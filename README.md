@@ -32,7 +32,7 @@ SearcHPV have four main steps. You could either run it start-to-finish or run it
 
 * Usage:
 ```
-searcHPV <options> 
+searcHPV <options> ...
 ```
 * Standard options:
 ```
