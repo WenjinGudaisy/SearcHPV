@@ -112,7 +112,7 @@ setup(
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    package_dir={'searcHPV': './searcHPV'},  # Optional
+    #package_dir={'': 'searcHPV'},  # Optional
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
@@ -123,7 +123,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_packages(where='searcHPV'),  # Required
+    packages=find_packages(),  # Required
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -137,7 +137,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['os','sys','pysam','pandas','subprocess','argparse'],  # Optional
+    install_requires=['pysam','pandas','argparse'],  # Optional
 
     
 
@@ -163,7 +163,7 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={  # Optional
         'console_scripts': [
-            'searcHPV=searcHPV:main',
+            'searcHPV=searcHPV.main:main',
         ],
     },
 
