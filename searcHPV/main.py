@@ -60,7 +60,7 @@ def main():
         assemble(args.fq1, args.fq2, args.outputDir)
     elif args.hpvFusion:
         #check result from assemble
-        hpvFusion(args.humRef,args.virRef,args.outputDir)
+        hpv_fusion(args.humRef,args.virRef,args.outputDir)
         
   
     
