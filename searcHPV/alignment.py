@@ -15,12 +15,17 @@ from searcHPV.general import *
 #rmdup: = True: remove duplicate = False : don't remove duplicate, default = TRUE
 def alignment(fq1, fq2, humRef, virRef, outputDir, rmdup = True):
     #make output dir
+    outputDir = os.path.abspath(outputDir)
     mkdir(outputDir)
     scriptDir = f'{outputDir}/alignment'
     mkdir(scriptDir)
 
     #catenate humRef and virRef
     ref = catRef(humRef,virRef, outputDir)
+
+    #index humRef and virRef
+    indexFile = scriptDir + "/index.sh"
+    indexRef(indexFile,humRef,virRef,ref,outputDir)
 
     #generate alignment bash
 
@@ -37,14 +42,18 @@ def alignment(fq1, fq2, humRef, virRef, outputDir, rmdup = True):
     if not rmdup:
     ##generate indel alignment bash file
         with open(bashFile,'w') as output:
-            output.write(f'''bash {alignmentFile};
+            output.write(f'''#!/bin/bash
+bash {indexFile};
+bash {alignmentFile};
 bash {indelFile};''')
     else:
         generate_mkdup_bash(indelFile,outputDir)
 
 
         with open(bashFile,'w') as output:
-            output.write(f'''bash {alignmentFile};
+            output.write(f'''#!/bin/bash
+bash {indexFile};
+bash {alignmentFile};
 bash {indelFile};''')
 
     #run scripts

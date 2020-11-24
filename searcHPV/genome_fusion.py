@@ -6,22 +6,21 @@ from searcHPV.generate_call_fusion import *
 def genomeFusion(window,out_dir,virRef):
 
     bam = f'{out_dir}/alignment/alignment.RG.indelre.mkdup.sort.bam'
-    checkFile(bam)
+    check_file(bam)
     #make dir for output
     out_dir = f'{out_dir}/call_fusion'
     mkdir(out_dir)
 
     #find the virus_chrm
     with open(virRef) as virRefFile:
-        virus_chrm = virRefFile.readline().replace('>','')
+        virus_chrm = virRefFile.readline().replace('>','').replace('\n','')
 
     #identify fusion points on genome
-    define_fusion(bam,virus_chrm,out_dir) #generate out_dir/genome_fusion.txt
+    res = define_fusion(bam,virus_chrm,out_dir) #generate out_dir/genome_fusion.txt
 
     #filter and cluster fusion points
     ##sort result
-    res = f'{out_dir}/genome_fusion.txt'
-    os.system(f'(head -n 1 {res} && tail -n +2 {res} | sort -k3,3rn) > {out_dir}/call_fusion/genome_fusion.sort.txt')
+    os.system(f'(head -n 1 {res} && tail -n +2 {res} | sort -k3,3rn) > {out_dir}/genome_fusion.sort.txt')
 
 
     #change format for cluster
@@ -31,7 +30,7 @@ def genomeFusion(window,out_dir,virRef):
 
     with open(f'{out_dir}/all.result','w') as output:   
             fusion_li = []
-            with open(f'{out_dir}/call_fusion/genome_fusion.sort.txt') as res:
+            with open(f'{out_dir}/genome_fusion.sort.txt') as res:
                 res.readline()
                 for line in res.read().rstrip().split('\n'):
                     elements = line.rstrip().split('\t')
@@ -61,12 +60,12 @@ def genomeFusion(window,out_dir,virRef):
                     for pos in pos_li:
                         single_count = int(pos.split(':')[2])
                         pair_count = int(pos.split(':')[3])
-                        if single_count > 2 and pair_count > 2:
+                        if single_count > 6 and pair_count > 6:
                         #or (single_count > 5) or (pair_count > 5)
                             new_pos_li.append(pos + ':high')
-                        elif single_count + pair_count >= 5:
+                        elif (single_count > 2 and pair_count > 2) or (single_count + pair_count >= 5):
                             new_pos_li.append(pos + ':low')
                             
                     new_pos_infor = ';'.join(new_pos_li)
-                    outf.write('\t'.join(new_pos_infor))
+                    outf.write(new_pos_infor)
     return None

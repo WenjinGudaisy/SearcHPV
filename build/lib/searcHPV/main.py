@@ -11,16 +11,16 @@ def main():
                                      description ='An HPV intgegration detection tool for targted capture sequencing') 
   
     parser.add_argument('-fastq1', type = str, dest= "fq1",
-                        help ='sequencing data: fastq/fq.gz file', 
+                        help ='sequencing data: fastq/fq.gz file', required=True,
                         )
     parser.add_argument('-fastq2', type = str, dest = 'fq2',
-                        help ='sequencing data: fastq/fq.gz file', 
+                        help ='sequencing data: fastq/fq.gz file', required=True,
                         )
     parser.add_argument('-humRef', type = str, dest = 'humRef',
-                        help ='human reference genome: fasta file', 
+                        help ='human reference genome: fasta file', required=True,
                         )
     parser.add_argument('-virRef', type = str, dest = 'virRef',
-                        help ='HPV reference genome: fasta file', 
+                        help ='HPV reference genome: fasta file', required=True,
                         )
     parser.add_argument('-window', type = int, default=300, dest = 'window',
                         help ='the length of region searching for informative reads, default=300', 
@@ -60,7 +60,11 @@ def main():
         assemble(args.fq1, args.fq2, args.outputDir)
     elif args.hpvFusion:
         #check result from assemble
-        hpvFusion(args.humRef,args.virRef,args.outputDir)
-        
+        hpv_fusion(args.humRef,args.virRef,args.outputDir)
+    else:
+        alignment(args.fq1, args.fq2, args.humRef, args.virRef, args.outputDir)
+        genomeFusion(args.window,args.outputDir,args.virRef)
+        assemble(args.fq1, args.fq2, args.outputDir)
+        hpv_fusion(args.humRef,args.virRef,args.outputDir)
   
     

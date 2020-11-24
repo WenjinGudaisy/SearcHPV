@@ -35,7 +35,9 @@ def find_end(pos,cigar):
 #bam: alignment.RG.indelre.mkdup.sort.bam
 #virus_chrm: name of virus chromosome in virus reference genome
 ##out_dir:output path
+#return: output file
 def define_fusion(bam,virus_chrm,out_dir):
+    out_dir = os.path.abspath(out_dir)
     paired_read_li = []
     clipped_read_li = []
 
@@ -150,11 +152,11 @@ def define_fusion(bam,virus_chrm,out_dir):
                     paired_evidence_count += 1
         b[i] += (str(paired_evidence_count),)
     
-    with open(f'{out_dir}/genome_fusion.txt') as output:
+    with open(f'{out_dir}/genome_fusion.txt','w') as output:
         output.write('chrm\tpos\tsingle_evidence\tpaired_evidence\n')
         for i in b:
             output.write(f'{i[0]}\t{i[1]}\t{i[2]}\t{i[3]}\n')
-    return None
+    return f'{out_dir}/genome_fusion.txt'
 
 ##################
 #cluster fusion points within certain base pair

@@ -14,6 +14,32 @@ def catRef(humRef, virRef, outputDir):
     newRef = f'{outputDir}/hg_hpv.fa'
     return(newRef)
 
+#####################
+##generate bash script for index reference genome
+#Function: index customized reference
+#bash_file: output bash script
+#humRef: human genome
+#virRef: virus genome
+#newRef: customize genome
+#outputDir: output directory
+def indexRef(bash_file,humRef,virRef,newRef,outputDir):
+    with open(bash_file,'w') as output:
+        output.write(f'''#bwa index {humRef}
+#bwa index {virRef}
+bwa index {newRef}
+#samtools faidx {humRef}
+#samtools faidx {virRef}
+samtools faidx {newRef}
+#java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
+CreateSequenceDictionary R={humRef} O={humRef.replace('.fa','.dict')}
+#java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
+CreateSequenceDictionary R={virRef} O={virRef.replace('.fa','.dict')}
+java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
+CreateSequenceDictionary R={newRef} O={newRef.replace('.fa','.dict')}
+''')
+    return None
+
+
 
 
 #####################
@@ -53,7 +79,7 @@ echo \'alignment done\'
 #java: full path of java
 def generate_indel_alignment_bash(bash_File,ref,out_dir):
     with open(bash_File,'w') as output:
-        output.write(f'''java -Xmx4g -jar picard.jar \
+        output.write(f'''java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
 AddOrReplaceReadGroups \
 I={out_dir}/alignment.bam \
 O={out_dir}/alignment.RG.bam \
@@ -64,12 +90,12 @@ RGSM=sample \
 RGLB=sample
 samtools sort -o {out_dir}/alignment.RG.sort.bam {out_dir}/alignment.RG.bam
 samtools index {out_dir}/alignment.RG.sort.bam
-java -Xmx4g -jar GenomeAnalysisTK.jar \
+java -Xmx4g -jar /sw/med/centos7/gatk/3.7/GenomeAnalysisTK.jar \
 -T RealignerTargetCreator \
 -R {ref} \
 -I {out_dir}/alignment.RG.sort.bam \
 -o {out_dir}/alignment.RG.intervals
-java -Xmx4g -jar GenomeAnalysisTK.jar \
+java -Xmx4g -jar /sw/med/centos7/gatk/3.7/GenomeAnalysisTK.jar \
 -T IndelRealigner \
 -R {ref} \
 -I {out_dir}/alignment.RG.sort.bam \
@@ -84,7 +110,7 @@ def generate_mkdup_bash(bash_File,out_dir):
     with open(bash_File,'a') as output:
         output.write(f'''
 samtools sort -n -o {out_dir}/alignment.RG.indelre.sortbyQ.bam {out_dir}/alignment.RG.indelre.bam
-java -Xmx4g -jar picard.jar MarkDuplicates \
+java -Xmx4g -jar /home/wenjingu/tools/picard.jar MarkDuplicates \
 I={out_dir}/alignment.RG.indelre.sortbyQ.bam \
 O={out_dir}/alignment.RG.indelre.mkdup.bam \
 M={out_dir}/alignment.RG.indelre.mkdup.txt \
