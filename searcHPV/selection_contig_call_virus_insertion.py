@@ -18,85 +18,86 @@ def read_mapping_info(out_dir):
     contigSRDict = {}
     if listSites != ['']:  
         for site in listSites:
-            hpv_bam = f"{out_dir}/call_fusion_virus/{site}/{site}.contigToHPV.sort.bam"
-            genome_bam = f"{out_dir}/call_fusion_virus/{site}/{site}.contigToGenome.sort.bam"
-            try:
-                samFile = pysam.AlignmentFile(hpv_bam,'rb')
-            except:
-                print("Contig cound not mapping to HPV",site)
-                continue
-                
+            if ".sh" not in site:
+                hpv_bam = f"{out_dir}/call_fusion_virus/{site}/{site}.contigToHPV.sort.bam"
+                genome_bam = f"{out_dir}/call_fusion_virus/{site}/{site}.contigToGenome.sort.bam"
+                try:
+                    samFile = pysam.AlignmentFile(hpv_bam,'rb')
+                except:
+                    print("Contig cound not mapping to HPV",site)
+                    continue
+                    
 
-            for read in samFile:
-                readList = []
-                contigName = read.qname
-                key = site+"."+contigName
-                if read.cigar != []:
-                    readList.append(read.query_alignment_length) #matched BP
-                    readList.append(read.cigarstring) #cigar
-                    readList.append(read.pos) #pos
-                    readList.append(read.cigar) #cigar turple
+                for read in samFile:
+                    readList = []
+                    contigName = read.qname
+                    key = site+"."+contigName
+                    if read.cigar != []:
+                        readList.append(read.query_alignment_length) #matched BP
+                        readList.append(read.cigarstring) #cigar
+                        readList.append(read.pos) #pos
+                        readList.append(read.cigar) #cigar turple
 
-                    if key in contigSamDictHPV.keys():
-                        contigSamDictHPV[key].append(readList)
-                    else:
-                        contigSamDictHPV[key] = [readList]
-                        
-                        
-            try:
-                samFile = pysam.AlignmentFile(genome_bam,'rb')
-            except:
-                print("Contig cound not mapping to Genome",sample,site)
-                continue
-                
+                        if key in contigSamDictHPV.keys():
+                            contigSamDictHPV[key].append(readList)
+                        else:
+                            contigSamDictHPV[key] = [readList]
+                            
+                            
+                try:
+                    samFile = pysam.AlignmentFile(genome_bam,'rb')
+                except:
+                    print("Contig cound not mapping to Genome",sample,site)
+                    continue
+                    
 
-            for read in samFile:
-                readList = []
-                contigName = read.qname
-                key = site+"."+contigName
-                
-                if read.cigar != []:
-                    readList.append(read.query_alignment_length) #matched BP
-                    readList.append(read.cigarstring) #cigar
-                    readList.append(read.pos) #pos
-                    readList.append(read.cigar) #cigar turple
+                for read in samFile:
+                    readList = []
+                    contigName = read.qname
+                    key = site+"."+contigName
+                    
+                    if read.cigar != []:
+                        readList.append(read.query_alignment_length) #matched BP
+                        readList.append(read.cigarstring) #cigar
+                        readList.append(read.pos) #pos
+                        readList.append(read.cigar) #cigar turple
 
-                    if key in contigSamDictGenome.keys():
-                        contigSamDictGenome[key].append(readList)
-                        
-                    else:
-                        contigSamDictGenome[key] = [readList]
+                        if key in contigSamDictGenome.keys():
+                            contigSamDictGenome[key].append(readList)
+                            
+                        else:
+                            contigSamDictGenome[key] = [readList]
 
-        #read length from contig file
-        
-            contigPath = f"{out_dir}/assemble/{site}/pearOutput/{site}.all.fa.cap.contigs"
+            #read length from contig file
+            
+                contigPath = f"{out_dir}/assemble/{site}/pearOutput/{site}.all.fa.cap.contigs"
 
-            with open(contigPath) as contigFile:
-                contigs = contigFile.read().rstrip().split('>')
-                for each in contigs:
-                    if each != '':
-                        rows = each.rstrip().split('\n')
-                        key = site+"."+rows[0]
-                        allSeq = ''
-                        for seq in rows[1:]:
-                            allSeq += seq
-                            #allSeq = allSeq.replace("N","")
-                            contigLengthDict[key] = len(allSeq)#full length
+                with open(contigPath) as contigFile:
+                    contigs = contigFile.read().rstrip().split('>')
+                    for each in contigs:
+                        if each != '':
+                            rows = each.rstrip().split('\n')
+                            key = site+"."+rows[0]
+                            allSeq = ''
+                            for seq in rows[1:]:
+                                allSeq += seq
+                                #allSeq = allSeq.replace("N","")
+                                contigLengthDict[key] = len(allSeq)#full length
 
-            #read sr num from srNum.txt
-            srPath = f'{out_dir}/call_fusion_virus/{site}/srNum.txt'
-            with open(srPath) as sr:
-                info = sr.read().rstrip().split('\n')
-                for eachinfo in info:
-                    infoList = eachinfo.split('\t')
-                    key = infoList[0]
-            #                     print(key)
-                    try:
-                        srNum = infoList[1]
-                        contigSRDict[key] = int(srNum)
-                    except:
-                        print("didn't find srNUM.txt")
-                        print(key)
+                #read sr num from srNum.txt
+                srPath = f'{out_dir}/call_fusion_virus/{site}/srNum.txt'
+                with open(srPath) as sr:
+                    info = sr.read().rstrip().split('\n')
+                    for eachinfo in info:
+                        infoList = eachinfo.split('\t')
+                        key = infoList[0]
+                #                     print(key)
+                        try:
+                            srNum = infoList[1]
+                            contigSRDict[key] = int(srNum)
+                        except:
+                            print("didn't find srNUM.txt")
+                            print(key)
                 
 
     #print(contigLengthDict)    
@@ -157,11 +158,13 @@ def cal_hpv_ins(contigDict,out_dir):
                     for each in value[0][1][-1]:
                         if each[0]== 0:
                             newCigarTurple[i][1] = matchLength
+                            break
                         i += 1
-                    if newCigarTurple[i+1][0] == 4 or newCigarTurple[i+1][0] == 5:
-                        newCigarTurple[i+1][1] = newCigarTurple[i+1][1] - int(value[0][0][0])
-                    else:
-                        print("Error",newCigarTurple)
+                    print(value,newCigarTurple)
+                    # if newCigarTurple[i+1][0] == 4 or newCigarTurple[i+1][0] == 5:
+                    #     newCigarTurple[i+1][1] = newCigarTurple[i+1][1] - int(value[0][0][0])
+                    # else:
+                    #     print("Error",newCigarTurple)
 
                     newValue = [[[matchLength]+value[0][1][1:-1] + [newCigarTurple]],value[1],value[-2],value[-1]]
                 else:
@@ -175,7 +178,7 @@ def cal_hpv_ins(contigDict,out_dir):
                         if each[0]== 0:
                             newCigarTurple[i][1] = matchLength
                         i += 1
-                    if newCigarTurple[0][0] == 4:
+                    if newCigarTurple[0][0] == 4 or newCigarTurple[0][0] == 5:
                         #print('1',newCigarTurple[0])
                         newCigarTurple[0][1] = newCigarTurple[0][1] - int(value[0][1][0])
                     else:
@@ -230,23 +233,24 @@ def cal_hpv_ins(contigDict,out_dir):
 #for wierd contigs
     contigWierd = {}
     for site in listSites:
-        for key,value in contigDict.items():
-    #         if key == 'Sample_109356.11.38317802.Contig1':
-            if site in key:
-                #3 situation, 
-                    #1: due to HPV circle structure, pos is 0 and number of matched bp is equal to the mate's
-                    #soft/hard clip length
-                    #2: due to dupilication of HPV. matched region has overlap region with mate's matched region
-                    #3: matched region has no overlap region, seperated with mate's matched region
+        if ".sh" not in site:
+            for key,value in contigDict.items():
+        #         if key == 'Sample_109356.11.38317802.Contig1':
+                if site in key:
+                    #3 situation, 
+                        #1: due to HPV circle structure, pos is 0 and number of matched bp is equal to the mate's
+                        #soft/hard clip length
+                        #2: due to dupilication of HPV. matched region has overlap region with mate's matched region
+                        #3: matched region has no overlap region, seperated with mate's matched region
 
-                    #for 1, add the length of this read and its mate together, combine two list to be one
+                        #for 1, add the length of this read and its mate together, combine two list to be one
 
-                #2,3 wierd hits need check
-                if len(value[0]) > 1:
-                    if value[0][0][2] == 0:
-                        pass
-                    else:
-                        contigWierd[key] = value
+                    #2,3 wierd hits need check
+                    if len(value[0]) > 1:
+                        if value[0][0][2] == 0:
+                            pass
+                        else:
+                            contigWierd[key] = value
 
 
 
@@ -285,7 +289,7 @@ def cal_hpv_ins(contigDict,out_dir):
             value.append(hpvInsertion)
         else:
 
-            pos = int(key.split('.')[2])
+            pos = int(key.split('.')[1])
             diff = pos
             valueWant = value[1][0]
             for each in value[1]:
@@ -600,7 +604,7 @@ def write_to_file(selectedAllContig,out_dir):
         os.system(f'rm {outputPath}/HPVfusionPointContig.txt')
     siteConfidence = {}
     with open(f'{out_dir}/call_fusion/all.filtered.clustered.result') as site_res:
-        siteList = site_res.read().split('\t')[1].split(';')
+        siteList = site_res.read().split(';')
         #print(siteList)
         for eachSite in siteList:
             chro = eachSite.split(':')[0]

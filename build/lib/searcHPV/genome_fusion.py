@@ -26,7 +26,7 @@ def genomeFusion(window,out_dir,virRef):
     #change format for cluster
     chrm_li = range(1,22)
     chrm_li = list(map(str,chrm_li))
-    chrm_li+=['X','Y','MT']
+    chrm_li+=['X','Y']
 
     with open(f'{out_dir}/all.result','w') as output:   
             fusion_li = []
@@ -36,10 +36,13 @@ def genomeFusion(window,out_dir,virRef):
                     elements = line.rstrip().split('\t')
                     if elements != ['']:
                         #split read count
+                        chrom = elements[0]
+                        pos = elements[1]
                         count = elements[2]
                         #pair-end read count
                         pair_count = elements[3]
-                        fusion_li.append(f'{elements[0]}:{elements[1]}:{count}:{pair_count}')
+                        if chrom in chrm_li:
+                            fusion_li.append(f'{elements[0]}:{elements[1]}:{count}:{pair_count}')
             to_print = ';'.join(fusion_li)
             output.write(f'{to_print}')
 
@@ -60,10 +63,10 @@ def genomeFusion(window,out_dir,virRef):
                     for pos in pos_li:
                         single_count = int(pos.split(':')[2])
                         pair_count = int(pos.split(':')[3])
-                        if single_count > 6 and pair_count > 6:
+                        if single_count > 2 and pair_count > 2 or (single_count + pair_count >= 5):
                         #or (single_count > 5) or (pair_count > 5)
                             new_pos_li.append(pos + ':high')
-                        elif (single_count > 2 and pair_count > 2) or (single_count + pair_count >= 5):
+                        else:
                             new_pos_li.append(pos + ':low')
                             
                     new_pos_infor = ';'.join(new_pos_li)

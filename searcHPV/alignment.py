@@ -31,8 +31,8 @@ def alignment(fq1, fq2, humRef, virRef, outputDir, rmdup = True):
 
     alignmentFile = scriptDir + "/orignal.alignment.sh"
     indelFile = scriptDir + "/indel.alignment.sh"
-    generate_alignment_bash(alignmentFile,ref,fq1,fq2,outputDir)
-    generate_indel_alignment_bash(indelFile,ref,outputDir)
+    generate_alignment_bash(alignmentFile,ref,fq1,fq2,scriptDir)
+    generate_indel_alignment_bash(indelFile,ref,scriptDir)
     check_file(alignmentFile)
     check_file(indelFile)
 
@@ -47,7 +47,7 @@ bash {indexFile};
 bash {alignmentFile};
 bash {indelFile};''')
     else:
-        generate_mkdup_bash(indelFile,outputDir)
+        generate_mkdup_bash(indelFile,scriptDir)
 
 
         with open(bashFile,'w') as output:

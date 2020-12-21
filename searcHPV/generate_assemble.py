@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import pysam
 from searcHPV.general import *
 
 ########################
@@ -78,10 +79,11 @@ def extract_read_name(bam,fusionRes,out_dir,virRef):
     #     print('dir exists')
     #find the virus_chrm
     with open(virRef) as virRefFile:
-        virus_chrm = virRefFile.readline().replace('>','')
+        virus_chrm = virRefFile.readline().replace('>','').replace('\n','')
     for site in candidate_in:
         chrm = site.split(':')[0]
         pos = int(site.split(':')[1])
+        #print(chrm,pos,bam,virus_chrm)
         read_list = get_reads(chrm=chrm,pos=pos,bam=bam,ref_genome =virus_chrm)
         outf_path = f'{out_dir}/{chrm}.{pos}/'
         mkdir(outf_path)
@@ -104,13 +106,14 @@ def extract_read_seq(out_dir,fq1,fq2):
     with open(f'{out_dir}/extractReadSequence.sh','w') as bash:
         bash.write('#!/bin/bash\n')
         for site in os.listdir(out_dir):
-            readNamePath = f'{out_dir}/{site}/readName.txt'
-            outputPath = f'{out_dir}/{site}/supportiveReads/'
-            if not os.path.exists(outputPath):
-                os.system(f'mkdir -p {outputPath}')
-            tab = '\"\\t\"'
-            newLine = '\"\\n\"'
-            bash.write(f'''zcat {fq1} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
+            if ".sh" not in site:
+                readNamePath = f'{out_dir}/{site}/readName.txt'
+                outputPath = f'{out_dir}/{site}/supportiveReads/'
+                if not os.path.exists(outputPath):
+                    os.system(f'mkdir -p {outputPath}')
+                tab = '\"\\t\"'
+                newLine = '\"\\n\"'
+                bash.write(f'''zcat {fq1} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
 zcat {fq2} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.2.fq;
 ''')
         bash.write('echo \'extract informative sequences done\'')
@@ -122,28 +125,29 @@ zcat {fq2} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[
 def preprocessForPear(out_dir):
     listSites = os.listdir(out_dir)
     for site in listSites:
-        outputPath = f'{out_dir}/{site}/supportiveReads/'
-        with open(f'{outputPath}/{site}.informativeReads.1.fq','r') as inputFile:
-            with open(f'{outputPath}/{site}.formalizedReads.1.fq','w') as outputFile:
-                i = 0
-                readList = inputFile.read().split('\n')
-                for each in readList:
-                    if '@' in each and '+' in readList[i+4]:
-                        rowSeq = readList[i+1] + readList[i+2]+readList[i+3]
-                        rowInfo = readList[i+5] + readList[i+6]+readList[i+7]
-                        outputFile.write(each+'\n'+rowSeq+'\n+\n'+rowInfo+'\n')
-                    i += 1
+        if '.sh' not in site:
+            outputPath = f'{out_dir}/{site}/supportiveReads/'
+            with open(f'{outputPath}/{site}.informativeReads.1.fq','r') as inputFile:
+                with open(f'{outputPath}/{site}.formalizedReads.1.fq','w') as outputFile:
+                    i = 0
+                    readList = inputFile.read().split('\n')
+                    for each in readList:
+                        if '@' in each and '+' in readList[i+4]:
+                            rowSeq = readList[i+1] + readList[i+2]+readList[i+3]
+                            rowInfo = readList[i+5] + readList[i+6]+readList[i+7]
+                            outputFile.write(each+'\n'+rowSeq+'\n+\n'+rowInfo+'\n')
+                        i += 1
 
-        with open(f'{outputPath}/{site}.informativeReads.2.fq','r') as inputFile:
-            with open(f'{outputPath}/{site}.formalizedReads.2.fq','w') as outputFile:
-                i = 0
-                readList = inputFile.read().split('\n')
-                for each in readList:
-                    if '@' in each and '+' in readList[i+4]:
-                        rowSeq = readList[i+1] + readList[i+2]+readList[i+3]
-                        rowInfo = readList[i+5] + readList[i+6]+readList[i+7]
-                        outputFile.write(each+'\n'+rowSeq+'\n+\n'+rowInfo+'\n')
-                    i += 1  
+            with open(f'{outputPath}/{site}.informativeReads.2.fq','r') as inputFile:
+                with open(f'{outputPath}/{site}.formalizedReads.2.fq','w') as outputFile:
+                    i = 0
+                    readList = inputFile.read().split('\n')
+                    for each in readList:
+                        if '@' in each and '+' in readList[i+4]:
+                            rowSeq = readList[i+1] + readList[i+2]+readList[i+3]
+                            rowInfo = readList[i+5] + readList[i+6]+readList[i+7]
+                            outputFile.write(each+'\n'+rowSeq+'\n+\n'+rowInfo+'\n')
+                        i += 1  
     return None
 
 ########################
@@ -153,12 +157,14 @@ def preprocessForPear(out_dir):
 def pear(out_dir):
     listSites = os.listdir(out_dir)
     with open(f'{out_dir}/pear.sh','w') as output:
+        output.write('#!/bin/bash\n')
         for site in listSites:
-            outputPath = f'{out_dir}/{site}/pearOutput/'
-            fqPath = f'{out_dir}/{site}/supportiveReads/'
-            if not os.path.exists(outputPath):
-                os.mkdir(outputPath)
-            output.write(f'''
+            if ".sh" not in site:
+                outputPath = f'{out_dir}/{site}/pearOutput/'
+                fqPath = f'{out_dir}/{site}/supportiveReads/'
+                if not os.path.exists(outputPath):
+                    os.mkdir(outputPath)
+                output.write(f'''
     pear \
     -f {fqPath}/{site}.formalizedReads.1.fq \
     -r {fqPath}/{site}.formalizedReads.2.fq \
@@ -171,49 +177,49 @@ def pear(out_dir):
 def preprocessForCap3(out_dir):
     listSites = os.listdir(out_dir)
     for site in listSites:
-        
-        pearOutputPath = f'{out_dir}/{site}/pearOutput/'
+        if ".sh" not in site:
+            pearOutputPath = f'{out_dir}/{site}/pearOutput/'
 
-        #change unassemble reads to be fasta
-        with open(f'{pearOutputPath}/{site}.unassembled.forward.fastq',encoding='utf8',errors='ignore') as fq:
-            with open(f'{pearOutputPath}/{site}.1.fa','w') as fa:
-                #fq = fq.read().rstrip().decode('uft-16').split('\n')
-                fq = fq.read().rstrip().split('\n')
-                i = 0
-                for eachRow in fq:
-                    if '@' in eachRow:
-                        newName = eachRow.replace('@','>')
-                        rowSeq = fq[i+1]
-                        fa.write(newName + '.1' + '\n' + rowSeq + '\n')
-                    i += 1
-        with open(f'{pearOutputPath}/{site}.unassembled.reverse.fastq',encoding='utf8',errors='ignore') as fq:
-            with open(f'{pearOutputPath}/{site}.2.fa','w') as fa:
-                #fq = fq.read().rstrip().decode('uft-16').split('\n')
-                fq = fq.read().rstrip().split('\n')
-                i = 0
-                for eachRow in fq:
-                    if '@' in eachRow:
-                        newName = eachRow.replace('@','>')
-                        rowSeq = fq[i+1]
-                        fa.write(newName + '.2' + '\n' + rowSeq + '\n')
-                    i += 1
-        #merge unassembled reads
-        os.system(f'cat {pearOutputPath}/{site}.1.fa {pearOutputPath}/{site}.2.fa > {pearOutputPath}/{site}.unassembled.fa')
+            #change unassemble reads to be fasta
+            with open(f'{pearOutputPath}/{site}.unassembled.forward.fastq',encoding='utf8',errors='ignore') as fq:
+                with open(f'{pearOutputPath}/{site}.1.fa','w') as fa:
+                    #fq = fq.read().rstrip().decode('uft-16').split('\n')
+                    fq = fq.read().rstrip().split('\n')
+                    i = 0
+                    for eachRow in fq:
+                        if '@' in eachRow:
+                            newName = eachRow.replace('@','>')
+                            rowSeq = fq[i+1]
+                            fa.write(newName + '.1' + '\n' + rowSeq + '\n')
+                        i += 1
+            with open(f'{pearOutputPath}/{site}.unassembled.reverse.fastq',encoding='utf8',errors='ignore') as fq:
+                with open(f'{pearOutputPath}/{site}.2.fa','w') as fa:
+                    #fq = fq.read().rstrip().decode('uft-16').split('\n')
+                    fq = fq.read().rstrip().split('\n')
+                    i = 0
+                    for eachRow in fq:
+                        if '@' in eachRow:
+                            newName = eachRow.replace('@','>')
+                            rowSeq = fq[i+1]
+                            fa.write(newName + '.2' + '\n' + rowSeq + '\n')
+                        i += 1
+            #merge unassembled reads
+            os.system(f'cat {pearOutputPath}/{site}.1.fa {pearOutputPath}/{site}.2.fa > {pearOutputPath}/{site}.unassembled.fa')
 
-        #change assembled reads to be fasta
-        with open(f'{pearOutputPath}/{site}.assembled.fastq',encoding='utf8',errors='ignore') as fq:
-            with open(f'{pearOutputPath}/{site}.assembled.fa','w') as fa:
-                #fqList = fq.read().rstrip().decode('uft-16').split('\n')
-                fqList = fq.read().rstrip().split('\n')
-                i = 0
-                for eachRow in fqList:
-                    if '@' in eachRow:
-                        newName = eachRow.replace('@','>')
-                        rowSeq = fqList[i+1]
-                        fa.write(newName + '\n' + rowSeq + '\n')
-                    i += 1
-        #merge all reads
-        os.system(f'cat {pearOutputPath}/{site}.assembled.fa {pearOutputPath}/{site}.unassembled.fa > {pearOutputPath}/{site}.all.fa')
+            #change assembled reads to be fasta
+            with open(f'{pearOutputPath}/{site}.assembled.fastq',encoding='utf8',errors='ignore') as fq:
+                with open(f'{pearOutputPath}/{site}.assembled.fa','w') as fa:
+                    #fqList = fq.read().rstrip().decode('uft-16').split('\n')
+                    fqList = fq.read().rstrip().split('\n')
+                    i = 0
+                    for eachRow in fqList:
+                        if '@' in eachRow:
+                            newName = eachRow.replace('@','>')
+                            rowSeq = fqList[i+1]
+                            fa.write(newName + '\n' + rowSeq + '\n')
+                        i += 1
+            #merge all reads
+            os.system(f'cat {pearOutputPath}/{site}.assembled.fa {pearOutputPath}/{site}.unassembled.fa > {pearOutputPath}/{site}.all.fa')
 
     return None
 
@@ -225,12 +231,14 @@ def preprocessForCap3(out_dir):
 def cap3(out_dir):
     listSites = os.listdir(out_dir)
     with open(f'{out_dir}/cap3.sh','w') as bashFile:
+        bashFile.write('#!/bin/bash\n')
         for site in listSites:
-            faPath = f'{out_dir}/{site}/pearOutput/'
-            cap3OutputPath = f'{out_dir}/{site}/cap3Output/'
-            mkdir(cap3OutputPath)
-            bashFile.write(f'''
-    cap3 {faPath}/{site}.all.fa > {cap3OutputPath}/{site}.CAP3
-    ''')
+            if ".sh" not in site:
+                faPath = f'{out_dir}/{site}/pearOutput/'
+                cap3OutputPath = f'{out_dir}/{site}/cap3Output/'
+                mkdir(cap3OutputPath)
+                bashFile.write(f'''
+        cap3 {faPath}/{site}.all.fa > {cap3OutputPath}/{site}.CAP3
+        ''')
         bashFile.write('echo \'CAP3 done\'')
     return f'{out_dir}/cap3.sh'

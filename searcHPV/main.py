@@ -57,14 +57,14 @@ def main():
         genomeFusion(args.window,args.outputDir,args.virRef)
     elif args.assemble: 
         #check result from genomeFusion
-        assemble(args.fq1, args.fq2, args.outputDir)
+        assemble(args.fq1, args.fq2, args.outputDir,args.virRef)
     elif args.hpvFusion:
         #check result from assemble
         hpv_fusion(args.humRef,args.virRef,args.outputDir)
     else:
         alignment(args.fq1, args.fq2, args.humRef, args.virRef, args.outputDir)
         genomeFusion(args.window,args.outputDir,args.virRef)
-        assemble(args.fq1, args.fq2, args.outputDir)
+        assemble(args.fq1, args.fq2, args.outputDir,args.virRef)
         hpv_fusion(args.humRef,args.virRef,args.outputDir)
   
     
