@@ -83,9 +83,7 @@ setup(
         'Development Status :: 3 - Alpha',
 
         # Indicate who your project is intended for
-        'Intended Audience :: Bioinformatists',
-        'Topic :: Genomics :: HPV',
-
+        
         # Pick your license as you wish
         'License :: OSI Approved :: MIT License',
 

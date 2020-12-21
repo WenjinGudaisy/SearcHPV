@@ -92,8 +92,6 @@ Description: # SearcHPV
 Keywords: HPV,integration,targeted capture sequencing
 Platform: UNKNOWN
 Classifier: Development Status :: 3 - Alpha
-Classifier: Intended Audience :: Bioinformatists
-Classifier: Topic :: Genomics :: HPV
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: Unix
 Classifier: Programming Language :: Python :: 3
