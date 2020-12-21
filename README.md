@@ -43,9 +43,10 @@ searcHPV <options> ...
 ```
 * Optional options:
 ```
+-h, --help      show this help message and exit
 -window <int>   the length of region searching for informative reads, default=300
 -output <str>   output directory, default "./"
--align  run the alignment step, step1
+-alignment      run the alignment step, step1
 -genomeFusion   call the genome fusion points, step2
 -assemble local assemble for each integration event, step3
 -hpvFusion call the HPV fusion points, step4
