@@ -63,10 +63,10 @@ def genomeFusion(window,out_dir,virRef):
                     for pos in pos_li:
                         single_count = int(pos.split(':')[2])
                         pair_count = int(pos.split(':')[3])
-                        if single_count > 2 and pair_count > 2 or (single_count + pair_count >= 5):
+                        if single_count > 2 and pair_count >2:
                         #or (single_count > 5) or (pair_count > 5)
                             new_pos_li.append(pos + ':high')
-                        else:
+                        elif single_count + pair_count >= 5:
                             new_pos_li.append(pos + ':low')
                             
                     new_pos_infor = ';'.join(new_pos_li)

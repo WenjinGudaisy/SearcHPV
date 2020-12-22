@@ -136,6 +136,10 @@ def preprocessForPear(out_dir):
                             rowSeq = readList[i+1] + readList[i+2]+readList[i+3]
                             rowInfo = readList[i+5] + readList[i+6]+readList[i+7]
                             outputFile.write(each+'\n'+rowSeq+'\n+\n'+rowInfo+'\n')
+                        elif '@' in each:
+                            rowSeq = readList[i+1] + readList[i+2]+readList[i+3]
+                            rowInfo = readList[i+1] + readList[i+2]+readList[i+3]
+                            outputFile.write(each+'\n'+rowSeq+'\n+\n'+rowInfo+'\n')
                         i += 1
 
             with open(f'{outputPath}/{site}.informativeReads.2.fq','r') as inputFile:
@@ -146,6 +150,10 @@ def preprocessForPear(out_dir):
                         if '@' in each and '+' in readList[i+4]:
                             rowSeq = readList[i+1] + readList[i+2]+readList[i+3]
                             rowInfo = readList[i+5] + readList[i+6]+readList[i+7]
+                            outputFile.write(each+'\n'+rowSeq+'\n+\n'+rowInfo+'\n')
+                        elif '@' in each:
+                            rowSeq = readList[i+1] + readList[i+2]+readList[i+3]
+                            rowInfo = readList[i+1] + readList[i+2]+readList[i+3]
                             outputFile.write(each+'\n'+rowSeq+'\n+\n'+rowInfo+'\n')
                         i += 1  
     return None
