@@ -19,6 +19,8 @@ PEAR/0.9.2 https://github.com/tseemann/PEAR
 CAP3/02/10/15 http://seq.cs.iastate.edu/cap3.html
 
 ```
+After intalling these tools, please make sure that their path have been added to you ".bashrc" script so that you can use them by typing the tool names in the terminal.
+
 2. Download and install
 Firstly, download and install the required resources.
 Then, tap these commands in your terminal:
@@ -66,14 +68,19 @@ searchHPV -assemble -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fas
 searchHPV -hpvFusion -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279
 
 ```
+Note: if run it step-by-step, please make sure the output directories for all steps are the same.
+
 ## Output
 1. Alignment: the marked dupliaction alignment bam file and customized reference genome.\\
 2. Genome Fusion Point Calling: orignal callset, filtered callset, filtered clustered callset.\\
 3. Assemble: supportive reads, contigs for each integration events (unfiltered).\\
 4. HPV fusion Point Calling: alignment bam file for contigs againt human and HPV genome.\\
-Final output: summary of all the integration events, contig sequences for all the integration events.
+Final outputs are under the folder "call_fusion_virus": 
+summary of all the integration events : "HPVfusionPointContig.txt"
+contig sequences for all the integration events: "ContigsSequence.fa"
 
 ## Citation
+SearcHPV: a novel approach to identify and assemble human papillomavirus-host genomic integration events in cancer --- In progress
 
 ## Contact
 wenjingu@umich.edu
