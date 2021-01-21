@@ -593,15 +593,10 @@ def select_contig(combinedContigDic):
 #         print(each,combinedContigDic[each])
 # print(selectedAllContig['Sample_109371.X.71608238'])
 
-
-
-################
-#write output to file
+###############
+#extract siteConfidence
 #out_dir: output directory for seacHPV
-def write_to_file(selectedAllContig,out_dir):
-    outputPath = f'{out_dir}/call_fusion_virus/'
-    if os.path.isfile(outputPath + 'HPVfusionPointContig.txt'):
-        os.system(f'rm {outputPath}/HPVfusionPointContig.txt')
+def siteConf(out_dir):
     siteConfidence = {}
     with open(f'{out_dir}/call_fusion/all.filtered.clustered.result') as site_res:
         siteList = site_res.read().split(';')
@@ -609,18 +604,101 @@ def write_to_file(selectedAllContig,out_dir):
         for eachSite in siteList:
             chro = eachSite.split(':')[0]
             site =  eachSite.split(':')[1]
-            siteConfidence[chro + ':' + site] = eachSite.split(':')[-1]
+            siteConfidence[chro + '.' + site] = [eachSite.split(':')[2],eachSite.split(':')[3],eachSite.split(':')[-1]]
+    return siteConfidence
+
+#############
+#extract contig sequence
+#out_dir:
+def extractContigSeq(contigDic,out_dir):
+    contigSeq = {}
+    for key,value in contigDic.items():
+        chro = key.split('.')[0]
+        if 'GL' not in chro:
+            file = f'{out_dir}/assemble/{key}/pearOutput/{key}.all.fa.cap.contigs'
+            with open(file) as contigs:
+                contigs = contigs.read().split('>')
+        #         print(contigs)
+
+                for contig in contigs:
+                    if contig != '':
+                        contig = contig.rstrip('')
+                        contigName = contig.split('\n')[0]
+                        for selectedContig in value:
+                            selectedContigName = selectedContig[0]
+                            if selectedContigName == contigName:
+                                sequence = ''.join(contig.split('\n')[1:])
+                                if key in contigSeq:
+                                    contigSeq[key].append([contigName,sequence])
+                                else:
+                                    contigSeq[key] = [[contigName,sequence]]
+    return contigSeq
+        
+##############
+# check if repetive region in contig
+def check_rep(contigSeq,key):
+    repFlag = False
+    repA = 'A'*80
+    repT = 'T'*80
+    repC = 'C'*80
+    repG = 'G'*80
+    for eachSeq in contigSeq[key]:
+        if repA in eachSeq[1] or repT in eachSeq[1] or repC in eachSeq[1] or repG in eachSeq[1]:
+            repFlag = True
+    return repFlag
+
+
+################
+#filter results with only one low confident contig and low number of supportive reads, repetitive region
+def filter_res(selectedAllContig,siteConfidence,out_dir):
+    contigSeq = extractContigSeq(selectedAllContig,out_dir)
+    filteredSelectedContig = {}
+    
+    for key in selectedAllContig:
+        if int(siteConfidence[key][0]) < 4 and int(siteConfidence[key][1]) < 4:
+            i = 0
+            for contig in selectedAllContig[key]:
+                i += 1
+        #if two contigs
+            if i > 1:
+                filteredSelectedContig[key] = selectedAllContig[key]
+            else:
+        #only one contig
+                #if low confident contig
+                if contig[-1] == 'lowConfidence':
+                    #if supprotive read greater than 3
+                    if contig[-3] > 3:
+                        if check_rep(contigSeq,key)== False:
+                            filteredSelectedContig[key] = selectedAllContig[key]
+                else:
+                    if check_rep(contigSeq,key) == False:
+                        filteredSelectedContig[key] = selectedAllContig[key]
+        else:
+            if check_rep(contigSeq,key) == False:
+                filteredSelectedContig[key] = selectedAllContig[key]
+    return filteredSelectedContig
+
+
+
+################
+#write output to file
+#out_dir: output directory for seacHPV
+def write_to_file(filteredSelectedContig,siteConfidence,out_dir):
+    outputPath = f'{out_dir}/call_fusion_virus/'
+    if os.path.isfile(outputPath + 'HPVfusionPointContig.txt'):
+        os.system(f'rm {outputPath}/HPVfusionPointContig.txt')
+    
             
     with open(outputPath + 'HPVfusionPointContig.txt','w') as output: 
         output.write('contigName\tgenomeInsertionChromosome\tgenomeInsertionPoint\thpvInsertionPoint\tSiteConfidence\tContigConfidence\n')
     #     output.write('sampleName\tcontigName\tgenomeInsertionChromosome\tgenomeInsertionPoint\thpvInsertionPoint\tConfidence\n')
-        for key,value in selectedAllContig.items():
+        for key,value in filteredSelectedContig.items():
     #         if key != 'Sample_81279.3.189612850':
             
             chro = key.split('.')[0]
             if 'GL' not in chro:
                 genomeInsertion = key.split('.')[1]
-                siteConf = siteConfidence[chro + ':' + genomeInsertion]
+                siteConf = siteConfidence[chro + '.' + genomeInsertion][2]
                 if siteConf == 'high':
                     siteConfOutput = 'High Confidence Site'
                 else:
@@ -641,7 +719,7 @@ def write_to_file(selectedAllContig,out_dir):
     #extract sequence for contigs and write to file
     outputFile = outputPath + "ContigsSequence.fa"
     with open(outputFile,'w') as output:
-        for key,value in selectedAllContig.items():
+        for key,value in filteredSelectedContig.items():
             chro = key.split('.')[0]
             if 'GL' not in chro:
                 file = f'{out_dir}/assemble/{key}/pearOutput/{key}.all.fa.cap.contigs'
@@ -663,8 +741,8 @@ def write_to_file(selectedAllContig,out_dir):
 
 
 
-    f = open(outputPath +  'selectedAllContigDic.pickle',"wb")
-    pickle.dump(selectedAllContig,f)
+    f = open(outputPath +  'filteredSelectedContig.pickle',"wb")
+    pickle.dump(filteredSelectedContig,f)
     f.close()
 
     # f = open(outputPath +  'weirdContig.pickle',"wb")
@@ -676,6 +754,4 @@ def write_to_file(selectedAllContig,out_dir):
     # f.close()
 
     return None
-
-
 

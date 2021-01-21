@@ -20,4 +20,6 @@ def hpv_fusion(humRef,virRef,out_dir):
     contigDic = read_mapping_info(out_dir)
     combinedContigDic = cal_hpv_ins(contigDic,out_dir)
     selectedAllContig = select_contig(combinedContigDic)
-    write_to_file(selectedAllContig,out_dir)
+    siteConfidence = siteConf(out_dir)
+    filteredSelectedContig = filter_res(selectedAllContig,siteConfidence,out_dir)
+    write_to_file(filteredSelectedContig,siteConfidence,out_dir)

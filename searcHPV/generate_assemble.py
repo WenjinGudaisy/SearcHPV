@@ -174,8 +174,8 @@ def pear(out_dir):
                     os.mkdir(outputPath)
                 output.write(f'''
     pear \
-    -f {fqPath}/{site}.formalizedReads.1.fq \
-    -r {fqPath}/{site}.formalizedReads.2.fq \
+    -f {fqPath}/{site}.informativeReads.1.fq \
+    -r {fqPath}/{site}.informativeReads.2.fq \
     -o {outputPath}/{site}''')
     return f'{out_dir}/pear.sh'
 
