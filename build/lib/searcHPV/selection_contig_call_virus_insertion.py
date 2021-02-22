@@ -601,10 +601,11 @@ def siteConf(out_dir):
     with open(f'{out_dir}/call_fusion/all.filtered.clustered.result') as site_res:
         siteList = site_res.read().split(';')
         #print(siteList)
-        for eachSite in siteList:
-            chro = eachSite.split(':')[0]
-            site =  eachSite.split(':')[1]
-            siteConfidence[chro + '.' + site] = [eachSite.split(':')[2],eachSite.split(':')[3],eachSite.split(':')[-1]]
+        if siteList != ['']:
+            for eachSite in siteList:
+                chro = eachSite.split(':')[0]
+                site =  eachSite.split(':')[1]
+                siteConfidence[chro + '.' + site] = [eachSite.split(':')[2],eachSite.split(':')[3],eachSite.split(':')[-1]]
     return siteConfidence
 
 #############

@@ -29,7 +29,7 @@ def mapToHgRef(out_dir,humRef):
     samtools view -bhS -@ 8 {sitePath}/{site}.contigToGenome.sam > {sitePath}/{site}.contigToGenome.bam;
     samtools sort -@ 8 -o {sitePath}/{site}.contigToGenome.sort.bam {sitePath}/{site}.contigToGenome.bam;
     samtools index {sitePath}/{site}.contigToGenome.sort.bam;
-    rm {sitePath}/{site}.contigToGenome.sam\n''')
+    rm {sitePath}/{site}.contigToGenome.bam;\n''')
     return f'{outputPath}/alignContigsToGenome.sh'
 
 #############
@@ -57,7 +57,7 @@ def mapToVirRef(out_dir,virRef):
     samtools sort -@ 8 -o {sitePath}/{site}.contigToHPV.sort.bam {contigPath}/{site}.contigToHPV.bam;
     samtools index {sitePath}/{site}.contigToHPV.sort.bam;
     samtools faidx {contigPath}/{site}.all.fa.cap.contigs;
-    rm {sitePath}/{site}.contigToGenome.sam\n''')
+    rm {contigPath}/{site}.contigToHPV.bam;\n''')
     return f'{outputPath}/alignContigsToHPV.sh'
 
 #############

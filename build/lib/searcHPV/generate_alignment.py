@@ -24,15 +24,15 @@ def catRef(humRef, virRef, outputDir):
 #outputDir: output directory
 def indexRef(bash_file,humRef,virRef,newRef,outputDir):
     with open(bash_file,'w') as output:
-        output.write(f'''#bwa index {humRef}
-#bwa index {virRef}
+        output.write(f'''bwa index {humRef}
+bwa index {virRef}
 bwa index {newRef}
-#samtools faidx {humRef}
-#samtools faidx {virRef}
+samtools faidx {humRef}
+samtools faidx {virRef}
 samtools faidx {newRef}
-#java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
+java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
 CreateSequenceDictionary R={humRef} O={humRef.replace('.fa','.dict')}
-#java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
+java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
 CreateSequenceDictionary R={virRef} O={virRef.replace('.fa','.dict')}
 java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
 CreateSequenceDictionary R={newRef} O={newRef.replace('.fa','.dict')}
