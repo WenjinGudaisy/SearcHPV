@@ -1,3 +1,11 @@
+[![Documentation Status](https://readthedocs.org/projects/searchpv/badge/?version=latest)](https://searchpv.readthedocs.io/en/latest/?badge=latest)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/WenjinGudaisy/SearcHPV/blob/main/LICENSE) 
+</br> 
+
+|Host | Downloads |
+|:----|:---------:|
+|PyPI | [![Downloads](https://pepy.tech/badge/searchpv)](https://pepy.tech/project/searchpv)
+
 # SearcHPV
 An HPV integration point detection tool for targeted capture sequencing data
 
