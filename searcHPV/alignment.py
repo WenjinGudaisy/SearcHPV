@@ -13,7 +13,8 @@ from searcHPV.general import *
 #humRef: human reference genome
 #outputDir: output directory
 #rmdup: = True: remove duplicate = False : don't remove duplicate, default = TRUE
-def alignment(fq1, fq2, humRef, virRef, outputDir, rmdup = True):
+#multi: if fastq file is in gz format: default = True
+def alignment(fq1, fq2, humRef, virRef, outputDir, rmdup = True, gz = True):
     #make output dir
     outputDir = os.path.abspath(outputDir)
     mkdir(outputDir)
@@ -31,7 +32,7 @@ def alignment(fq1, fq2, humRef, virRef, outputDir, rmdup = True):
 
     alignmentFile = scriptDir + "/orignal.alignment.sh"
     indelFile = scriptDir + "/indel.alignment.sh"
-    generate_alignment_bash(alignmentFile,ref,fq1,fq2,scriptDir)
+    generate_alignment_bash(alignmentFile,ref,fq1,fq2,scriptDir,gz)
     generate_indel_alignment_bash(indelFile,ref,scriptDir)
     check_file(alignmentFile)
     check_file(indelFile)

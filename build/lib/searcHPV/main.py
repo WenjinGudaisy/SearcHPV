@@ -25,6 +25,9 @@ def main():
     parser.add_argument('-window', type = int, default=300, dest = 'window',
                         help ='the length of region searching for informative reads, default=300', 
                         )
+    parser.add_argument('-gz', action ='store_const', const = True,
+                        default = False, dest ='gz', 
+                        help ="if fastq files are in gz format")
     parser.add_argument('-output', type = str, default="./",dest = 'outputDir',
                         help ='output directory, default "./"', 
                         )
@@ -51,20 +54,20 @@ def main():
     args = parser.parse_args() 
     
   
-    if args.alignment: 
-        alignment(args.fq1, args.fq2, args.humRef, args.virRef, args.outputDir)
+    if args.alignment:
+        alignment(fq1 = args.fq1, fq2 = args.fq2, humRef = args.humRef, virRef = args.virRef, outputDir = args.outputDir, gz = args.gz)
     elif args.genomeFusion: 
         genomeFusion(args.window,args.outputDir,args.virRef)
     elif args.assemble: 
         #check result from genomeFusion
-        assemble(args.fq1, args.fq2, args.outputDir,args.virRef)
+        assemble(args.fq1, args.fq2, args.outputDir,args.virRef,args.gz)
     elif args.hpvFusion:
         #check result from assemble
         hpv_fusion(args.humRef,args.virRef,args.outputDir)
     else:
-        alignment(args.fq1, args.fq2, args.humRef, args.virRef, args.outputDir)
+        alignment(fq1 = args.fq1, fq2 = args.fq2, humRef = args.humRef, virRef = args.virRef, outputDir = args.outputDir, gz = args.gz)
         genomeFusion(args.window,args.outputDir,args.virRef)
-        assemble(args.fq1, args.fq2, args.outputDir,args.virRef)
+        assemble(args.fq1, args.fq2, args.outputDir,args.virRef,args.gz)
         hpv_fusion(args.humRef,args.virRef,args.outputDir)
   
     

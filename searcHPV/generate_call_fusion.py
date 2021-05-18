@@ -42,6 +42,7 @@ def define_fusion(bam,virus_chrm,out_dir):
     clipped_read_li = []
 
     samfile = pysam.AlignmentFile(bam, 'rb')
+    #print(samfile.references)
     if samfile.count(virus_chrm) != 0:
         for read in samfile.fetch(virus_chrm):
             # some filter here
@@ -69,13 +70,15 @@ def define_fusion(bam,virus_chrm,out_dir):
                 else:
                     continue
 
-
+    # for each in paired_read_li:
+    #     if each.query_name == 'HWI-ST1129:195:C0YAUACXX:5:1205:4558:86030':
+    #         print(each.get_tag('SA'),each.reference_name,each.next_reference_name)
 
     next_pos_li = []
     for read in paired_read_li:
         next_pos_li.append(f"{read.next_reference_name}:{read.next_reference_start}")
     next_pos_li_sort = sorted(next_pos_li)
-
+    
     from operator import itemgetter
     clipped_infor_li = []
     for read in clipped_read_li:
@@ -105,7 +108,6 @@ def define_fusion(bam,virus_chrm,out_dir):
             continue
     sorted_clipped_infor_li = sorted(clipped_infor_li,key=itemgetter(0,1))
     #print(sorted_clipped_infor_li)
-
     pos_li = []
     for read in sorted_clipped_infor_li:
         chrm = read[0]
@@ -152,11 +154,11 @@ def define_fusion(bam,virus_chrm,out_dir):
                     paired_evidence_count += 1
         b[i] += (str(paired_evidence_count),)
     
-    with open(f'{out_dir}/genome_fusion.txt','w') as output:
+    with open(f'{out_dir}/{virus_chrm}.genome_fusion.txt','w') as output:
         output.write('chrm\tpos\tsingle_evidence\tpaired_evidence\n')
         for i in b:
             output.write(f'{i[0]}\t{i[1]}\t{i[2]}\t{i[3]}\n')
-    return f'{out_dir}/genome_fusion.txt'
+    return f'{out_dir}/{virus_chrm}.genome_fusion.txt'
 
 ##################
 #cluster fusion points within certain base pair

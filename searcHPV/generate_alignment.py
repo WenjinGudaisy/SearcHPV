@@ -24,15 +24,15 @@ def catRef(humRef, virRef, outputDir):
 #outputDir: output directory
 def indexRef(bash_file,humRef,virRef,newRef,outputDir):
     with open(bash_file,'w') as output:
-        output.write(f'''bwa index {humRef}
-bwa index {virRef}
+        output.write(f'''#bwa index {humRef}
+#bwa index {virRef}
 bwa index {newRef}
-samtools faidx {humRef}
-samtools faidx {virRef}
+#samtools faidx {humRef}
+#samtools faidx {virRef}
 samtools faidx {newRef}
-java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
+#java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
 CreateSequenceDictionary R={humRef} O={humRef.replace('.fa','.dict')}
-java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
+#java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
 CreateSequenceDictionary R={virRef} O={virRef.replace('.fa','.dict')}
 java -Xmx4g -jar /home/wenjingu/tools/picard.jar \
 CreateSequenceDictionary R={newRef} O={newRef.replace('.fa','.dict')}
@@ -50,15 +50,25 @@ CreateSequenceDictionary R={newRef} O={newRef.replace('.fa','.dict')}
 #fq1: fastq1 file
 #fq2: fastq2 file
 #out_dir: outputPath
-def generate_alignment_bash(bash_file,ref,fq1,fq2,out_dir):
+#gz: if fastq file is in gz format: default = True
+def generate_alignment_bash(bash_file,ref,fq1,fq2,out_dir,gz = True):
     with open(bash_file,'w') as output:
-        output.write(f'''
-bwa mem {ref} '<zcat {fq1}' '<zcat {fq2}' > {out_dir}/alignment.sam
-samtools view -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
-samtools sort -o {out_dir}/alignment.sort {out_dir}/alignment.bam
-rm {out_dir}/alignment.sam
-echo \'alignment done\'
-''')
+        if gz:
+            output.write(f'''
+    bwa mem {ref} '<zcat {fq1}' '<zcat {fq2}' > {out_dir}/alignment.sam
+    samtools view -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
+    samtools sort -o {out_dir}/alignment.sort {out_dir}/alignment.bam
+    rm {out_dir}/alignment.sam
+    echo \'alignment done\'
+    ''')
+        else:
+            output.write(f'''
+    bwa mem {ref} '<cat {fq1}' '<cat {fq2}' > {out_dir}/alignment.sam
+    samtools view -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
+    samtools sort -o {out_dir}/alignment.sort {out_dir}/alignment.bam
+    rm {out_dir}/alignment.sam
+    echo \'alignment done\'
+    ''')
     return None
 
  ################

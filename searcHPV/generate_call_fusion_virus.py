@@ -24,12 +24,11 @@ def mapToHgRef(out_dir,humRef):
                     sitePath = f'{out_dir}/call_fusion_virus/{site}/'
                     mkdir(sitePath)
                     bashFile.write( f'''bwa mem -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
-    {humRef} \
-    {contigPath}/{site}.all.fa.cap.contigs > {sitePath}/{site}.contigToGenome.sam;
-    samtools view -bhS -@ 8 {sitePath}/{site}.contigToGenome.sam > {sitePath}/{site}.contigToGenome.bam;
-    samtools sort -@ 8 -o {sitePath}/{site}.contigToGenome.sort.bam {sitePath}/{site}.contigToGenome.bam;
-    samtools index {sitePath}/{site}.contigToGenome.sort.bam;
-    rm {sitePath}/{site}.contigToGenome.bam;\n''')
+{humRef} {contigPath}/{site}.all.fa.cap.contigs > {sitePath}/{site}.contigToGenome.sam;
+samtools view -bhS -@ 8 {sitePath}/{site}.contigToGenome.sam > {sitePath}/{site}.contigToGenome.bam;
+samtools sort -@ 8 -o {sitePath}/{site}.contigToGenome.sort.bam {sitePath}/{site}.contigToGenome.bam;
+samtools index {sitePath}/{site}.contigToGenome.sort.bam;
+rm {sitePath}/{site}.contigToGenome.bam;\n''')
     return f'{outputPath}/alignContigsToGenome.sh'
 
 #############
@@ -44,21 +43,20 @@ def mapToVirRef(out_dir,virRef):
     mkdir(outputPath)
     #if there are sites
     if listSites != ['']:
-        with open( f'{outputPath}/alignContigsToHPV.sh','w') as bashFile:
+        with open( f'{outputPath}/alignContigsToVirus.sh','w') as bashFile:
             bashFile.write('#!/bin/bash\n')
             for site in listSites:
                 if ".sh" not in site:
                     contigPath = f'{sitesPath}/{site}/pearOutput/'
                     sitePath = f'{out_dir}/call_fusion_virus/{site}/'
                     bashFile.write( f'''bwa mem -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
-    {virRef} \
-    {contigPath}/{site}.all.fa.cap.contigs > {contigPath}/{site}.contigToHPV.sam;
-    samtools view -bhS -@ 8 {contigPath}/{site}.contigToHPV.sam >  {contigPath}/{site}.contigToHPV.bam;
-    samtools sort -@ 8 -o {sitePath}/{site}.contigToHPV.sort.bam {contigPath}/{site}.contigToHPV.bam;
-    samtools index {sitePath}/{site}.contigToHPV.sort.bam;
-    samtools faidx {contigPath}/{site}.all.fa.cap.contigs;
-    rm {contigPath}/{site}.contigToHPV.bam;\n''')
-    return f'{outputPath}/alignContigsToHPV.sh'
+{virRef} {contigPath}/{site}.all.fa.cap.contigs > {contigPath}/{site}.contigToVirus.sam;
+samtools view -bhS -@ 8 {contigPath}/{site}.contigToVirus.sam >  {contigPath}/{site}.contigToVirus.bam;
+samtools sort -@ 8 -o {sitePath}/{site}.contigToVirus.sort.bam {contigPath}/{site}.contigToVirus.bam;
+samtools index {sitePath}/{site}.contigToVirus.sort.bam;
+samtools faidx {contigPath}/{site}.all.fa.cap.contigs;
+rm {contigPath}/{site}.contigToVirus.bam;\n''')
+    return f'{outputPath}/alignContigsToVirus.sh'
 
 #############
 #Function: count number of supprotive reads for each contig

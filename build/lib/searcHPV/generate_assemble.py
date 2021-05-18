@@ -55,18 +55,25 @@ def get_reads(chrm,pos,bam,ref_genome,windowSize=300):
 #extract informative reads name from original bam file
 #bam: original bam file, alignment.RG.indelre.mkdup.sort.bam
 #fusionRes: genome fusion result file from genome fusion step, all.filtered.clustered.result
-#out_dir:out put directory for assemble
-def extract_read_name(bam,fusionRes,out_dir,virRef):
+#out_dir:out put directory all
+def extract_read_name(bam,out_dir,virRef):
     #####for this step, need to modify from Yifan's script
     #candidate_in = os.popen(f'grep \'{sample}\' {out_dir}/call_fusion/all.filtered.clustered.result')
     #############
-    
-    with open(fusionRes) as candidate_in:
-        candidate_in = candidate_in.read().rstrip()
+    virus_chrm_list = []
+    with open(virRef) as virRefFile:
+        for each in virRefFile.read().rstrip().split('\n'):
+            if '>' in each:
+                virus_chrm_list.append(each.split()[0].replace('>',''))
+    for virus_chrm in virus_chrm_list:
+        fusionRes = f'{out_dir}/call_fusion/{virus_chrm}.all.filtered.clustered.result'
+        check_file(fusionRes)
+        with open(fusionRes) as candidate_in:
+            candidate_in = candidate_in.read().rstrip()
 
-    #if there are fusion points
-    if candidate_in != "":
-        candidate_in = candidate_in.split(";")
+        #if there are fusion points
+        if candidate_in != "":
+            candidate_in = candidate_in.split(";")
 #for each candidate site, collect reads with truncation and abberant pairs upstream and downstream windowbp and reads in HPV
     # sampleDir = f'/home/wenjingu/myScratch/ourResult/newVersion/targetedExomeResult/{sample}.{windowSize}'
     # try:
@@ -78,22 +85,18 @@ def extract_read_name(bam,fusionRes,out_dir,virRef):
     # except:
     #     print('dir exists')
     #find the virus_chrm
-    with open(virRef) as virRefFile:
-        virus_chrm = virRefFile.readline().replace('>','').replace('\n','')
-    for site in candidate_in:
-        chrm = site.split(':')[0]
-        pos = int(site.split(':')[1])
-        #print(chrm,pos,bam,virus_chrm)
-        read_list = get_reads(chrm=chrm,pos=pos,bam=bam,ref_genome =virus_chrm)
-        outf_path = f'{out_dir}/{chrm}.{pos}/'
-        mkdir(outf_path)
-
-        outf = open(f'{outf_path}/readName.txt', 'w')
-        
-    #my dir
-        for each in read_list:
-            print(f'>{each}',file=outf)
-        outf.close()
+        for site in candidate_in:
+            chrm = site.split(':')[0]
+            pos = int(site.split(':')[1])
+            #print(chrm,pos,bam,virus_chrm)
+            read_list = get_reads(chrm=chrm,pos=pos,bam=bam,ref_genome =virus_chrm)
+            outf_path = f'{out_dir}/assemble/{chrm}.{pos}/'
+            mkdir(outf_path)
+            outf = open(f'{outf_path}/readName.txt', 'a+')
+        #my dir
+            for each in read_list:
+                print(f'>{each}',file=outf)
+            outf.close()
     return None
 
 ########################
@@ -102,7 +105,8 @@ def extract_read_name(bam,fusionRes,out_dir,virRef):
 #fq1:raw sequenction data, fastq file
 #fq2:raw sequencing data, fastq file
 #return: path of bash script
-def extract_read_seq(out_dir,fq1,fq2):
+#gz: if fastq file is in gz format
+def extract_read_seq(out_dir,fq1,fq2,gz):
     with open(f'{out_dir}/extractReadSequence.sh','w') as bash:
         bash.write('#!/bin/bash\n')
         for site in os.listdir(out_dir):
@@ -113,8 +117,13 @@ def extract_read_seq(out_dir,fq1,fq2):
                     os.system(f'mkdir -p {outputPath}')
                 tab = '\"\\t\"'
                 newLine = '\"\\n\"'
-                bash.write(f'''zcat {fq1} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
+                if gz:
+                    bash.write(f'''zcat {fq1} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
 zcat {fq2} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.2.fq;
+''')
+                else:
+                    bash.write(f'''awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' {fq1} | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
+awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' {fq2} | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.2.fq;
 ''')
         bash.write('echo \'extract informative sequences done\'')
     return f'{out_dir}/extractReadSequence.sh'
@@ -193,24 +202,24 @@ def preprocessForCap3(out_dir):
                 with open(f'{pearOutputPath}/{site}.1.fa','w') as fa:
                     #fq = fq.read().rstrip().decode('uft-16').split('\n')
                     fq = fq.read().rstrip().split('\n')
-                    i = 0
-                    for eachRow in fq:
-                        if '@' in eachRow:
-                            newName = eachRow.replace('@','>')
-                            rowSeq = fq[i+1]
-                            fa.write(newName + '.1' + '\n' + rowSeq + '\n')
-                        i += 1
+                    if fq != ['']:
+                        for i in range(len(fq)):
+                            if i%4 == 0:
+                                newName = '>' + fq[i][1:]
+                                rowSeq = fq[i+1]
+                                fa.write( newName + '.1' + '\n' + rowSeq + '\n')
+                        
             with open(f'{pearOutputPath}/{site}.unassembled.reverse.fastq',encoding='utf8',errors='ignore') as fq:
                 with open(f'{pearOutputPath}/{site}.2.fa','w') as fa:
                     #fq = fq.read().rstrip().decode('uft-16').split('\n')
                     fq = fq.read().rstrip().split('\n')
-                    i = 0
-                    for eachRow in fq:
-                        if '@' in eachRow:
-                            newName = eachRow.replace('@','>')
-                            rowSeq = fq[i+1]
-                            fa.write(newName + '.2' + '\n' + rowSeq + '\n')
-                        i += 1
+                    if fq != ['']:
+                        for i in range(len(fq)):
+                            if i%4 == 0:
+                                newName = '>' + fq[i][1:]
+                                rowSeq = fq[i+1]
+                                fa.write(newName + '.2' + '\n' + rowSeq + '\n')
+                            i += 1
             #merge unassembled reads
             os.system(f'cat {pearOutputPath}/{site}.1.fa {pearOutputPath}/{site}.2.fa > {pearOutputPath}/{site}.unassembled.fa')
 
@@ -218,14 +227,15 @@ def preprocessForCap3(out_dir):
             with open(f'{pearOutputPath}/{site}.assembled.fastq',encoding='utf8',errors='ignore') as fq:
                 with open(f'{pearOutputPath}/{site}.assembled.fa','w') as fa:
                     #fqList = fq.read().rstrip().decode('uft-16').split('\n')
-                    fqList = fq.read().rstrip().split('\n')
-                    i = 0
-                    for eachRow in fqList:
-                        if '@' in eachRow:
-                            newName = eachRow.replace('@','>')
-                            rowSeq = fqList[i+1]
-                            fa.write(newName + '\n' + rowSeq + '\n')
-                        i += 1
+                    fq = fq.read().rstrip().split('\n')
+                    if fq != ['']:
+                        i = 0
+                        for i in range(len(fq)):
+                            if i%4 == 0:
+                                newName = '>' + fq[i][1:]
+                                rowSeq = fq[i+1]
+                                fa.write(newName + '\n' + rowSeq + '\n')
+                            i += 1
             #merge all reads
             os.system(f'cat {pearOutputPath}/{site}.assembled.fa {pearOutputPath}/{site}.unassembled.fa > {pearOutputPath}/{site}.all.fa')
 

@@ -19,7 +19,7 @@ def read_mapping_info(out_dir):
     if listSites != ['']:  
         for site in listSites:
             if ".sh" not in site:
-                hpv_bam = f"{out_dir}/call_fusion_virus/{site}/{site}.contigToHPV.sort.bam"
+                hpv_bam = f"{out_dir}/call_fusion_virus/{site}/{site}.contigToVirus.sort.bam"
                 genome_bam = f"{out_dir}/call_fusion_virus/{site}/{site}.contigToGenome.sort.bam"
                 try:
                     samFile = pysam.AlignmentFile(hpv_bam,'rb')
@@ -47,7 +47,7 @@ def read_mapping_info(out_dir):
                 try:
                     samFile = pysam.AlignmentFile(genome_bam,'rb')
                 except:
-                    print("Contig cound not mapping to Genome",sample,site)
+                    print("Contig cound not mapping to Genome",site)
                     continue
                     
 
@@ -118,6 +118,7 @@ def read_mapping_info(out_dir):
 #for regular contig hpv insertion point between h/s and m
 #for regular contig, HPV insertion point between H and S
 def cal_hpv_ins(contigDict,out_dir):
+    
     sitesPath = f'{out_dir}/assemble/'
     listSites = os.listdir(sitesPath)
     contigRegular = {}
@@ -598,14 +599,16 @@ def select_contig(combinedContigDic):
 #out_dir: output directory for seacHPV
 def siteConf(out_dir):
     siteConfidence = {}
-    with open(f'{out_dir}/call_fusion/all.filtered.clustered.result') as site_res:
-        siteList = site_res.read().split(';')
-        #print(siteList)
-        if siteList != ['']:
-            for eachSite in siteList:
-                chro = eachSite.split(':')[0]
-                site =  eachSite.split(':')[1]
-                siteConfidence[chro + '.' + site] = [eachSite.split(':')[2],eachSite.split(':')[3],eachSite.split(':')[-1]]
+    for each in os.listdir(f'{out_dir}/call_fusion/'):
+        if 'all.filtered.clustered.result' in each:
+            with open(f'{out_dir}/call_fusion/{each}') as site_res:
+                siteList = site_res.read().split(';')
+                #print(siteList)
+                if siteList != ['']:
+                    for eachSite in siteList:
+                        chro = eachSite.split(':')[0]
+                        site =  eachSite.split(':')[1]
+                        siteConfidence[chro + '.' + site] = [eachSite.split(':')[2],eachSite.split(':')[3],eachSite.split(':')[-1]]
     return siteConfidence
 
 #############
