@@ -89,7 +89,7 @@ summary of all the integration events : "HPVfusionPointContig.txt"
 contig sequences for all the integration events: "ContigsSequence.fa"
 
 ## Citation
-SearcHPV: a novel approach to identify and assemble human papillomavirus-host genomic integration events in cancer --- In progress
+SearcHPV: a novel approach to identify and assemble human papillomavirus-host genomic integration events in cancer --- Accepted by Cancer
 
 ## Contact
 wenjingu@umich.edu
