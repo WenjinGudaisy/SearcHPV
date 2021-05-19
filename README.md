@@ -1,4 +1,4 @@
-[![Documentation Status](https://readthedocs.org/projects/searchpv/badge/?version=latest)](https://searchpv.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/searchpv/badge/?version=stable)](https://searchpv.readthedocs.io/en/stable/?badge=stable)
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/WenjinGudaisy/SearcHPV/blob/main/LICENSE)
 [![PyPI version](https://badge.fury.io/py/searcHPV.svg)](https://badge.fury.io/py/searcHPV)
 </br> 
