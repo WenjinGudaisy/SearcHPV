@@ -4,10 +4,9 @@ import pysam
 import pandas as pd
 import pickle
 
-# #read combined dic
-# res = f'{out_dir}/call_fusion_virus/combinedContigDic.pickle'
-# with open(res,'rb') as inputFile:
-#     combinedContigDic = pickle.load(inputFile)
+#Function: read the mapping information
+#out_dir: output directory
+
 def read_mapping_info(out_dir):
     #read mapping info
     sitesPath = f'{out_dir}/assemble/'
@@ -31,7 +30,7 @@ def read_mapping_info(out_dir):
                 for read in samFile:
                     readList = []
                     contigName = read.qname
-                    key = site+"."+contigName
+                    key = site + "." + contigName
                     if read.cigar != []:
                         readList.append(read.query_alignment_length) #matched BP
                         readList.append(read.cigarstring) #cigar
@@ -117,7 +116,7 @@ def read_mapping_info(out_dir):
 # find insertion point of HPV
 #for regular contig hpv insertion point between h/s and m
 #for regular contig, HPV insertion point between H and S
-def cal_hpv_ins(contigDict,out_dir):
+def cal_virus_ins(contigDict,out_dir):
     
     sitesPath = f'{out_dir}/assemble/'
     listSites = os.listdir(sitesPath)
@@ -263,7 +262,7 @@ def cal_hpv_ins(contigDict,out_dir):
     #     if key == 'Sample_109356.11.38317802.Contig1':
         if len(value[1]) == 1:
             matchedGenome = value[1][0][0]
-            diff = 7000#a big number
+            diff = 7000 #a big number
             
             for each in value[0]:
                 for slot in each[3]:
@@ -640,12 +639,13 @@ def extractContigSeq(contigDic,out_dir):
         
 ##############
 # check if repetive region in contig
-def check_rep(contigSeq,key):
+# n: poly(n), n*d(A/T/C/G), will report low confidence if contig contains poly(n)
+def check_rep(contigSeq,key,n):
     repFlag = False
-    repA = 'A'*80
-    repT = 'T'*80
-    repC = 'C'*80
-    repG = 'G'*80
+    repA = 'A'* n
+    repT = 'T'* n
+    repC = 'C'* n
+    repG = 'G'* n
     for eachSeq in contigSeq[key]:
         if repA in eachSeq[1] or repT in eachSeq[1] or repC in eachSeq[1] or repG in eachSeq[1]:
             repFlag = True
@@ -653,9 +653,10 @@ def check_rep(contigSeq,key):
 
 
 ################
-#filter results with only one low confident contig and low number of supportive reads, repetitive region
-def filter_res(selectedAllContig,siteConfidence,out_dir):
-    contigSeq = extractContigSeq(selectedAllContig,out_dir)
+#filter results with only one low confident contig and low number of supportive reads
+
+def filter_res(selectedAllContig,siteConfidence):
+    
     filteredSelectedContig = {}
     
     for key in selectedAllContig:
@@ -672,14 +673,11 @@ def filter_res(selectedAllContig,siteConfidence,out_dir):
                 if contig[-1] == 'lowConfidence':
                     #if supprotive read greater than 3
                     if contig[-3] > 3:
-                        if check_rep(contigSeq,key)== False:
-                            filteredSelectedContig[key] = selectedAllContig[key]
-                else:
-                    if check_rep(contigSeq,key) == False:
                         filteredSelectedContig[key] = selectedAllContig[key]
+                else:
+                    filteredSelectedContig[key] = selectedAllContig[key]
         else:
-            if check_rep(contigSeq,key) == False:
-                filteredSelectedContig[key] = selectedAllContig[key]
+            filteredSelectedContig[key] = selectedAllContig[key]
     return filteredSelectedContig
 
 
@@ -687,13 +685,16 @@ def filter_res(selectedAllContig,siteConfidence,out_dir):
 ################
 #write output to file
 #out_dir: output directory for seacHPV
-def write_to_file(filteredSelectedContig,siteConfidence,out_dir):
+# n: poly(n), n*d(A/T/C/G), will report low confidence if contig contains poly(n)
+def write_to_file(filteredSelectedContig,siteConfidence,out_dir,n):
     outputPath = f'{out_dir}/call_fusion_virus/'
-    if os.path.isfile(outputPath + 'HPVfusionPointContig.txt'):
-        os.system(f'rm {outputPath}/HPVfusionPointContig.txt')
-    
+    if os.path.isfile(outputPath + 'VirusFusionPointContig.txt'):
+        os.system(f'rm {outputPath}/VirusFusionPointContig.txt')
+
+    # extract contigSeq
+    contigSeq = extractContigSeq(filteredSelectedContig,out_dir)
             
-    with open(outputPath + 'HPVfusionPointContig.txt','w') as output: 
+    with open(outputPath + 'VirusFusionPointContig.txt','w') as output: 
         output.write('contigName\tgenomeInsertionChromosome\tgenomeInsertionPoint\thpvInsertionPoint\tSiteConfidence\tContigConfidence\n')
     #     output.write('sampleName\tcontigName\tgenomeInsertionChromosome\tgenomeInsertionPoint\thpvInsertionPoint\tConfidence\n')
         for key,value in filteredSelectedContig.items():
@@ -707,6 +708,10 @@ def write_to_file(filteredSelectedContig,siteConfidence,out_dir):
                     siteConfOutput = 'High Confidence Site'
                 else:
                     siteConfOutput = 'Low Confidence Site'
+
+                
+
+
                 for eachContig in value:
                     #print(key,eachContig)
                     contigName = key + '.'+eachContig[0]
@@ -716,6 +721,11 @@ def write_to_file(filteredSelectedContig,siteConfidence,out_dir):
                     else:
                         hpvInsertion = eachContig[-2]
                         contigConfidence = 'Low Confidence Contig'
+
+                    if check_rep(contigSeq,key,n) == True:
+                        siteConfOutput = 'Poly(dn) in Contig'
+                        contigConfidence = 'Poly(dn) in Contig'
+                
                     output.write(f'{contigName}\t{chro}\t{genomeInsertion}\t {hpvInsertion}\t{siteConfOutput}\t{contigConfidence}\n')
                 output.write('\n')
 

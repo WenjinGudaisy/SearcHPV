@@ -1,7 +1,6 @@
 from searcHPV.generate_alignment import *
 import subprocess
 from searcHPV.general import *
-
 #####################
 #pipeline of alignment
 #Function:
@@ -12,21 +11,16 @@ from searcHPV.general import *
 #fq2: paired-end raw sequencing data, fastq2
 #humRef: human reference genome
 #outputDir: output directory
-#rmdup: = True: remove duplicate = False : don't remove duplicate, default = TRUE
 #multi: if fastq file is in gz format: default = True
-def alignment(fq1, fq2, humRef, virRef, outputDir, rmdup = True, gz = True):
+#index: if True, index the reference files; if False, not index the references files
+def alignment(fq1, fq2, humRef, virRef, outputDir, index, gz):
     #make output dir
     outputDir = os.path.abspath(outputDir)
     mkdir(outputDir)
     scriptDir = f'{outputDir}/alignment'
     mkdir(scriptDir)
-
     #catenate humRef and virRef
     ref = catRef(humRef,virRef, outputDir)
-
-    #index humRef and virRef
-    indexFile = scriptDir + "/index.sh"
-    indexRef(indexFile,humRef,virRef,ref,outputDir)
 
     #generate alignment bash
 
@@ -36,26 +30,51 @@ def alignment(fq1, fq2, humRef, virRef, outputDir, rmdup = True, gz = True):
     generate_indel_alignment_bash(indelFile,ref,scriptDir)
     check_file(alignmentFile)
     check_file(indelFile)
-
-    #rmdup for alignment results
-    
     bashFile = scriptDir + f"/alignment.sh"
-    if not rmdup:
-    ##generate indel alignment bash file
-        with open(bashFile,'w') as output:
-            output.write(f'''#!/bin/bash
-bash {indexFile};
-bash {alignmentFile};
-bash {indelFile};''')
+
+    #remove intermediate file
+    rmInter = scriptDir + f"/rm_inter.sh"
+    rm_inter_bam(rmInter,scriptDir)
+
+    if index:
+        #index humRef and virRef
+        indexFileHum = scriptDir + "/index_hum.sh"
+        indexRef(indexFileHum,humRef)
+        indexFileVir = scriptDir + "/index_vir.sh"
+        indexRef(indexFileVir,virRef)
+        indexFile = scriptDir + "/index.sh"
+        indexRef(indexFile,ref)
     else:
-        generate_mkdup_bash(indelFile,scriptDir)
+        indexFile = scriptDir + "/index.sh"
+        indexRef(indexFile,ref)
 
+    if index:
+    ##generate mkdup alignment bash file
+        mkdupFile = scriptDir + "/mkdup.alignment.sh"
+        generate_mkdup_bash(mkdupFile,scriptDir)
+
+        with open(bashFile,'w') as output:
+            output.write(f'''#!/bin/bash
+bash {indexFileHum};
+bash {indexFileVir};
+bash {indexFile};
+bash {alignmentFile};
+bash {indelFile};
+bash {mkdupFile};
+bash {rmInter};''')
+    else:
+        ##generate mkdup alignment bash file
+        mkdupFile = scriptDir + "/mkdup.alignment.sh"
+        generate_mkdup_bash(mkdupFile,scriptDir)
 
         with open(bashFile,'w') as output:
             output.write(f'''#!/bin/bash
 bash {indexFile};
 bash {alignmentFile};
-bash {indelFile};''')
+bash {indelFile};
+bash {mkdupFile}
+bash {rmInter};''')
+
 
     #run scripts
     check_file(bashFile)

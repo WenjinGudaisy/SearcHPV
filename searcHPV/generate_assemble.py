@@ -56,7 +56,8 @@ def get_reads(chrm,pos,bam,ref_genome,windowSize=300):
 #bam: original bam file, alignment.RG.indelre.mkdup.sort.bam
 #fusionRes: genome fusion result file from genome fusion step, all.filtered.clustered.result
 #out_dir:out put directory all
-def extract_read_name(bam,out_dir,virRef):
+#window:the length of region searching for informative reads, default=300
+def extract_read_name(bam,out_dir,virRef,window):
     #####for this step, need to modify from Yifan's script
     #candidate_in = os.popen(f'grep \'{sample}\' {out_dir}/call_fusion/all.filtered.clustered.result')
     #############
@@ -89,7 +90,7 @@ def extract_read_name(bam,out_dir,virRef):
             chrm = site.split(':')[0]
             pos = int(site.split(':')[1])
             #print(chrm,pos,bam,virus_chrm)
-            read_list = get_reads(chrm=chrm,pos=pos,bam=bam,ref_genome =virus_chrm)
+            read_list = get_reads(chrm=chrm,pos=pos,bam=bam,ref_genome =virus_chrm,windowSize=window)
             outf_path = f'{out_dir}/assemble/{chrm}.{pos}/'
             mkdir(outf_path)
             outf = open(f'{outf_path}/readName.txt', 'a+')
@@ -118,12 +119,12 @@ def extract_read_seq(out_dir,fq1,fq2,gz):
                 tab = '\"\\t\"'
                 newLine = '\"\\n\"'
                 if gz:
-                    bash.write(f'''zcat {fq1} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
-zcat {fq2} | awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.2.fq;
+                    bash.write(f'''zcat {fq1} | awk '{{if(NR%4!=0)ORS={tab};else ORS={newLine}}}1' | awk -F {tab} 'NR==FNR{{split($1,b," ");a[b[1]]=($1{newLine}$2{newLine}$3{newLine}$4)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
+zcat {fq2} | awk '{{if(NR%4!=0)ORS={tab};else ORS={newLine}}}1' | awk -F {tab} 'NR==FNR{{split($1,b," ");a[b[1]]=($1{newLine}$2{newLine}$3{newLine}$4)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.2.fq;
 ''')
                 else:
-                    bash.write(f'''awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' {fq1} | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
-awk '{{if(NR%4!=0)ORS=" ";else ORS={newLine}}}1' {fq2} | awk 'NR==FNR{{a[$1]=($1{tab}$2{newLine}$3{newLine}$4{newLine}$5)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.2.fq;
+                    bash.write(f'''awk '{{if(NR%4!=0)ORS={tab};else ORS={newLine}}}1' {fq1} | awk -F {tab} 'NR==FNR{{split($1,b," ");a[b[1]]=($1{newLine}$2{newLine}$3{newLine}$4)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.1.fq;
+awk '{{if(NR%4!=0)ORS={tab};else ORS={newLine}}}1' {fq2} | awk -F {tab} 'NR==FNR{{split($1,b," ");a[b[1]]=($1{newLine}$2{newLine}$3{newLine}$4)}}NR>FNR{{gsub(/>/,"@");if(a[$1]!={newLine})print a[$1]}}' - {readNamePath} | grep -v '^$' > {outputPath}/{site}.informativeReads.2.fq;
 ''')
         bash.write('echo \'extract informative sequences done\'')
     return f'{out_dir}/extractReadSequence.sh'

@@ -51,7 +51,7 @@ def genomeFusion(window,out_dir,virRef):
                 output.write(f'{to_print}')
 
         ##cluster the events within 100bp from each other, maybe becasue of SVs or CNVs
-        cluster_result(f'{out_dir}/{virus_chrm}.all.result',f'{out_dir}/{virus_chrm}.all.clustered.result')
+        cluster_result(f'{out_dir}/{virus_chrm}.all.result',f'{out_dir}/{virus_chrm}.all.clustered.result',window)
 
 
         ##filter for sites with at least 2 split read  and 2 pairs of read support(high cutoff) and their summation greater than 5
