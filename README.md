@@ -26,24 +26,24 @@ Firstly, download and install the required resources.
     2) Download the "environment.yaml" file under this repository
 
     3) Creat conda environment for SearcHPV:
-```
-conda env create -f [your_path]/environment.yaml
+        ```
+        conda env create -f [your_path]/environment.yaml
 
-```
-This command will automatically set up all the third-party tools and packages required for SearcHPV and install latest version of SearcHPV. The name of the environment is "searcHPV".
+        ```
+        This command will automatically set up all the third-party tools and packages required for SearcHPV and install latest version of SearcHPV. The name of the environment is "searcHPV".
 
-You can check the packages and tools in this environment by:
+        You can check the packages and tools in this environment by:
 
-```
-conda list -n searcHPV
+        ```
+        conda list -n searcHPV
 
-```
+        ```
 
-You can update the environment by:
-```
-conda env update -f [your_path]/environment.yaml
+        You can update the environment by:
+        ```
+        conda env update -f [your_path]/environment.yaml
 
-```
+        ```
 
 
 
@@ -106,7 +106,7 @@ picard CreateSequenceDictionary R={ref} O={ref.replace('.fa','.dict')
 
 
 4. Examples:
-1) Run it start-to-finish and submit a SBATCH job:
+    1) Run it start-to-finish and submit a SBATCH job:
 ```
 #!/bin/bash
 #SBATCH --job-name=searcHPV
@@ -126,7 +126,7 @@ conda activate searcHPV;
 searcHPV -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz -index;
 
 ```
-2) Run it step-by-step:
+    2) Run it step-by-step:
 ```
 searchHPV -alignment -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz -index
 searchHPV -genomeFusion -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz
