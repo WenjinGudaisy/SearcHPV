@@ -21,11 +21,11 @@ An HPV integration point detection tool for targeted capture sequencing data
 
 2. Download and install
 Firstly, download and install the required resources.
-1) Download Anaconda >=4.11.0: https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html#install-linux-silent
+    1) Download Anaconda >=4.11.0: https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html#install-linux-silent
 
-2) Download the "environment.yaml" file under this repository
+    2) Download the "environment.yaml" file under this repository
 
-3) Creat conda environment for SearcHPV:
+    3) Creat conda environment for SearcHPV:
 ```
 conda env create -f [your_path]/environment.yaml
 
@@ -48,6 +48,7 @@ conda env update -f [your_path]/environment.yaml
 
 
 3. Usage
+
 SearcHPV have four main steps. You could either run it start-to-finish or run it step-by-step.
 
 Before running SearcHPV, active the conda environment:
@@ -104,7 +105,7 @@ picard CreateSequenceDictionary R={ref} O={ref.replace('.fa','.dict')
 ```
 
 
-* Examples:
+4. Examples:
 1) Run it start-to-finish and submit a SBATCH job:
 ```
 #!/bin/bash
