@@ -109,37 +109,37 @@ picard CreateSequenceDictionary R={ref} O={ref.replace('.fa','.dict')
 4. Examples:
 
     1) Run it start-to-finish and submit a SBATCH job:
-```
-#!/bin/bash
-#SBATCH --job-name=searcHPV
-#SBATCH --mail-user=wenjingu@umich.edu
-#SBATCH --mail-type=BEGIN,END
-#SBATCH --cpus-per-task=1
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=8
-#SBATCH --mem=40gb
-#SBATCH --time=100:00:00
-#SBATCH --account=XXXXX
-#SBATCH --partition=standard
-#SBATCH --output=searcHPV.log
-#SBATCH --error=searcHPV.err
-source ~/anaconda3/etc/profile.d/conda.sh;
-conda activate searcHPV;      
-searcHPV -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz -index;
-```
-\\
+        ```
+        #!/bin/bash
+        #SBATCH --job-name=searcHPV
+        #SBATCH --mail-user=wenjingu@umich.edu
+        #SBATCH --mail-type=BEGIN,END
+        #SBATCH --cpus-per-task=1
+        #SBATCH --nodes=1
+        #SBATCH --ntasks-per-node=8
+        #SBATCH --mem=40gb
+        #SBATCH --time=100:00:00
+        #SBATCH --account=XXXXX
+        #SBATCH --partition=standard
+        #SBATCH --output=searcHPV.log
+        #SBATCH --error=searcHPV.err
+        source ~/anaconda3/etc/profile.d/conda.sh;
+        conda activate searcHPV;      
+        searcHPV -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz -index;
+        ```
+
 
     2) Run it step-by-step:
-\\
 
-```
-searchHPV -alignment -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz -index
-searchHPV -genomeFusion -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz
-searchHPV -assemble -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz
-searchHPV -hpvFusion -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz
 
-```
-Note: if run it step-by-step, please make sure the output directories for all steps are the same.
+        ```
+        searchHPV -alignment -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz -index
+        searchHPV -genomeFusion -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz
+        searchHPV -assemble -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz
+        searchHPV -hpvFusion -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz
+
+        ```
+        Note: if run it step-by-step, please make sure the output directories for all steps are the same.
 
 ## Output
 1. Alignment: the marked dupliaction alignment bam file and customized reference genome.\\
