@@ -68,7 +68,8 @@ conda activate searcHPV;
 ```
 Note: Please check your path of "conda.sh" if you did not install Anaconda in the home directory.
 
-* Usage of searcHPV:
+Usage of searcHPV:
+
 ```
 searcHPV <options> ...
 ```
@@ -94,7 +95,7 @@ searcHPV <options> ...
 -index          index the original human and virus reference files, default=False
 ```
 
-Note: If you've already indexed the virus and human reference files for BWA, Samtools, Picard, you don't need to add the "-index" option. Especailly when you run for a batch of samples that share the same virus and human reference files, you don't want to spend time on indexing references every time running a sample. The command for indexing the virus and human reference files:
+Note: If you've already indexed the virus and human reference files for BWA, Samtools, Picard, you do not need to add the "-index" option, especailly when you are running for a batch of samples that share the same virus and human reference files and you do not want to spend time on indexing references every time running a sample. The commands for indexing the virus and human reference files:
 
 ```
 #activate SearcHPV conda environment first to make sure using the correct versions of tools
@@ -106,6 +107,7 @@ picard CreateSequenceDictionary R={ref} O={ref.replace('.fa','.dict')
 
 
 4. Examples:
+
     1) Run it start-to-finish and submit a SBATCH job:
 ```
 #!/bin/bash
@@ -126,6 +128,7 @@ conda activate searcHPV;
 searcHPV -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz -index;
 
 ```
+
     2) Run it step-by-step:
 ```
 searchHPV -alignment -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz -index
