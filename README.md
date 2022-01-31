@@ -51,7 +51,7 @@ Firstly, download and install the required resources.
 
 SearcHPV have four main steps. You could either run it start-to-finish or run it step-by-step.
 
-Before running SearcHPV, active the conda environment:
+* Before running SearcHPV, active the conda environment:
 
 ```
 conda activate searcHPV
@@ -68,7 +68,7 @@ conda activate searcHPV;
 ```
 Note: Please check your path of "conda.sh" if you did not install Anaconda in the home directory.
 
-Usage of searcHPV:
+* Usage of searcHPV:
 
 ```
 searcHPV <options> ...
