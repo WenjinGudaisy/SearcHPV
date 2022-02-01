@@ -28,22 +28,23 @@ Firstly, download and install the required resources.
 
     3) Creat conda environment for SearcHPV:
 
-        ```
+       
         conda env create -f [your_path]/environment.yaml
-        ```
+        
 
-        This command will automatically set up all the third-party tools and packages required for SearcHPV and install latest version of SearcHPV. The name of the environment is "searcHPV".
+    This command will automatically set up all the third-party tools and packages required for SearcHPV and install latest version of SearcHPV. The name of the environment is "searcHPV".
 
-        You can check the packages and tools in this environment by:
+    You can check the packages and tools in this environment by:
 
-        ```
+        
         conda list -n searcHPV
-        ```
+        
+    
 
-        You can update the environment by:
-        ```
+    You can update the environment by:
+        
         conda env update -f [your_path]/environment.yaml
-        ```
+        
 
 
 
@@ -141,7 +142,7 @@ picard CreateSequenceDictionary R={ref} O={ref.replace('.fa','.dict')
 
         ```
 
-        Note: if run it step-by-step, please make sure the output directories for all steps are the same.
+    Note: if run it step-by-step, please make sure the output directories for all steps are the same.
 
 ## Output
 1. Alignment: the marked dupliaction alignment bam file and customized reference genome.\\
