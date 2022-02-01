@@ -32,6 +32,7 @@ Firstly, download and install the required resources.
         conda env create -f [your_path]/environment.yaml
 
         ```
+        
         This command will automatically set up all the third-party tools and packages required for SearcHPV and install latest version of SearcHPV. The name of the environment is "searcHPV".
 
         You can check the packages and tools in this environment by:
@@ -111,7 +112,7 @@ picard CreateSequenceDictionary R={ref} O={ref.replace('.fa','.dict')
 4. Examples:
 
     1) Run it start-to-finish and submit a SBATCH job:
-    
+
         ```
         #!/bin/bash
         #SBATCH --job-name=searcHPV
@@ -142,6 +143,7 @@ picard CreateSequenceDictionary R={ref} O={ref.replace('.fa','.dict')
         searchHPV -hpvFusion -fastq1 Sample_81279.R1.fastq.gz -fastq2 Sample_81279.R2.fastq.gz -humRef hs37d5.fa -virRef HPV.fa -output /home/scratch/HPV_fusion/Sample_81279 -gz
 
         ```
+
         Note: if run it step-by-step, please make sure the output directories for all steps are the same.
 
 ## Output
