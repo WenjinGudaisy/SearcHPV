@@ -30,22 +30,19 @@ Firstly, download and install the required resources.
 
         ```
         conda env create -f [your_path]/environment.yaml
-
         ```
-        
+
         This command will automatically set up all the third-party tools and packages required for SearcHPV and install latest version of SearcHPV. The name of the environment is "searcHPV".
 
         You can check the packages and tools in this environment by:
 
         ```
         conda list -n searcHPV
-
         ```
 
         You can update the environment by:
         ```
         conda env update -f [your_path]/environment.yaml
-
         ```
 
 
