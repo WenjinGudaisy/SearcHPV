@@ -26,7 +26,7 @@ def mapToRef(out_dir):
                     bashFile.write( f'''bwa mem -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
 {newRef} {contigPath}/{site}.all.fa.cap.contigs > {sitePath}/{site}.contig.sam;
 samtools view -bhS {sitePath}/{site}.contig.sam > {sitePath}/{site}.contig.bam;
-samtools sort {sitePath}/{site}.contig.bam {sitePath}/{site}.contig.sort;
+samtools sort {sitePath}/{site}.contig.bam -o {sitePath}/{site}.contig.sort.bam;
 samtools index {sitePath}/{site}.contig.sort.bam;
 rm {sitePath}/{site}.contig.bam;\n''')
     return f'{outputPath}/alignContigsToRef.sh'
@@ -56,7 +56,7 @@ def mapToHgRef(out_dir,humRef):
                     bashFile.write( f'''bwa mem -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
 {humRef} {contigPath}/{site}.all.fa.cap.contigs > {sitePath}/{site}.contigToGenome.sam;
 samtools view -bhS {sitePath}/{site}.contigToGenome.sam > {sitePath}/{site}.contigToGenome.bam;
-samtools sort {sitePath}/{site}.contigToGenome.bam {sitePath}/{site}.contigToGenome.sort;
+samtools sort {sitePath}/{site}.contigToGenome.bam -o {sitePath}/{site}.contigToGenome.sort.bam;
 samtools index {sitePath}/{site}.contigToGenome.sort.bam;
 rm {sitePath}/{site}.contigToGenome.bam;\n''')
     return f'{outputPath}/alignContigsToGenome.sh'
@@ -82,7 +82,7 @@ def mapToVirRef(out_dir,virRef):
                     bashFile.write( f'''bwa mem -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
 {virRef} {contigPath}/{site}.all.fa.cap.contigs > {contigPath}/{site}.contigToVirus.sam;
 samtools view -bhS {contigPath}/{site}.contigToVirus.sam >  {contigPath}/{site}.contigToVirus.bam;
-samtools sort {contigPath}/{site}.contigToVirus.bam {sitePath}/{site}.contigToVirus.sort;
+samtools sort {contigPath}/{site}.contigToVirus.bam -o {sitePath}/{site}.contigToVirus.sort.bam;
 samtools index {sitePath}/{site}.contigToVirus.sort.bam;
 samtools faidx {contigPath}/{site}.all.fa.cap.contigs;
 rm {contigPath}/{site}.contigToVirus.bam;\n''')

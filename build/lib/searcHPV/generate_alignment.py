@@ -48,7 +48,7 @@ def generate_alignment_bash(bash_file,ref,fq1,fq2,out_dir,gz = True):
             output.write(f'''
     bwa mem {ref} '<zcat {fq1}' '<zcat {fq2}' > {out_dir}/alignment.sam
     samtools view -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
-    samtools sort {out_dir}/alignment.bam {out_dir}/alignment.sort 
+    samtools sort {out_dir}/alignment.bam -o {out_dir}/alignment.sort.bam
     rm {out_dir}/alignment.sam
     echo \'alignment done\'
     ''')
@@ -56,7 +56,7 @@ def generate_alignment_bash(bash_file,ref,fq1,fq2,out_dir,gz = True):
             output.write(f'''
     bwa mem {ref} '<cat {fq1}' '<cat {fq2}' > {out_dir}/alignment.sam
     samtools view -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
-    samtools sort {out_dir}/alignment.bam {out_dir}/alignment.sort 
+    samtools sort {out_dir}/alignment.bam -o {out_dir}/alignment.sort.bam
     rm {out_dir}/alignment.sam
     echo \'alignment done\'
     ''')
@@ -89,7 +89,7 @@ RGPL=illumina \
 RGPU=NA \
 RGSM=sample \
 RGLB=sample
-samtools sort {out_dir}/alignment.RG.bam {out_dir}/alignment.RG.sort 
+samtools sort {out_dir}/alignment.RG.bam -o {out_dir}/alignment.RG.sort.bam
 samtools index {out_dir}/alignment.RG.sort.bam
 GenomeAnalysisTK \
 -T RealignerTargetCreator \
@@ -110,13 +110,13 @@ echo \'indel alignment done\'''')
 def generate_mkdup_bash(bash_File,out_dir):
     with open(bash_File,'w') as output:
         output.write(f'''
-samtools sort -n {out_dir}/alignment.RG.indelre.bam {out_dir}/alignment.RG.indelre.sortbyQ 
+samtools sort -n {out_dir}/alignment.RG.indelre.bam -o {out_dir}/alignment.RG.indelre.sortbyQ.bam
 picard MarkDuplicates \
 I={out_dir}/alignment.RG.indelre.sortbyQ.bam \
 O={out_dir}/alignment.RG.indelre.mkdup.bam \
 M={out_dir}/alignment.RG.indelre.mkdup.txt \
 TAGGING_POLICY=All ASSUME_SORT_ORDER=queryname
-samtools sort {out_dir}/alignment.RG.indelre.mkdup.bam {out_dir}/alignment.RG.indelre.mkdup.sort 
+samtools sort {out_dir}/alignment.RG.indelre.mkdup.bam -o {out_dir}/alignment.RG.indelre.mkdup.sort.bam
 samtools index {out_dir}/alignment.RG.indelre.mkdup.sort.bam
 echo \'indel alignment done\'''')
 
