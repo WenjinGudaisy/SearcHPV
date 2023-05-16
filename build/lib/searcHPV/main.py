@@ -61,6 +61,13 @@ def main():
                     default = False, dest ='index', 
                     help ="index the original human and virus reference files, default=False")
 
+    parser.add_argument('-memory', type = str, default="10G",dest = 'memory',
+                        help ='specify the maximum size, default "10G"', 
+                        )
+    parser.add_argument('-thread', type = int, default=1,dest = 'thread',
+                        help ='number of threads, default 1', 
+                        )
+
 
     
     
@@ -72,19 +79,19 @@ def main():
     
   
     if args.alignment:
-        alignment(fq1 = args.fq1, fq2 = args.fq2, humRef = args.humRef, virRef = args.virRef, index = args.index, outputDir = args.outputDir, gz = args.gz)
+        alignment(fq1 = args.fq1, fq2 = args.fq2, humRef = args.humRef, virRef = args.virRef, index = args.index, outputDir = args.outputDir, gz = args.gz, memory = args.memory,thread = args.thread)
     elif args.genomeFusion: 
         genomeFusion(args.clusterWindow,args.outputDir,args.virRef)
     elif args.assemble: 
         #check result from genomeFusion
-        assemble(args.fq1, args.fq2, args.outputDir,args.virRef,args.gz,args.window)
+        assemble(args.fq1, args.fq2, args.outputDir,args.virRef,args.gz,args.window, memory = args.memory,thread = args.thread)
     elif args.hpvFusion:
         #check result from assemble
-        virus_fusion(args.humRef,args.virRef,args.outputDir,args.n)
+        virus_fusion(args.humRef,args.virRef,args.outputDir,args.n,thread = args.thread)
     else:
-        alignment(fq1 = args.fq1, fq2 = args.fq2, humRef = args.humRef, virRef = args.virRef, index = args.index, outputDir = args.outputDir, gz = args.gz)
+        alignment(fq1 = args.fq1, fq2 = args.fq2, humRef = args.humRef, virRef = args.virRef, index = args.index, outputDir = args.outputDir, gz = args.gz, memory = args.memory,thread = args.thread)
         genomeFusion(args.clusterWindow,args.outputDir,args.virRef)
-        assemble(args.fq1, args.fq2, args.outputDir,args.virRef,args.gz,args.window)
-        virus_fusion(args.humRef,args.virRef,args.outputDir,args.n)
+        assemble(args.fq1, args.fq2, args.outputDir,args.virRef,args.gz,args.window, memory = args.memory,thread = args.thread)
+        virus_fusion(args.humRef,args.virRef,args.outputDir,args.n,thread = args.thread)
   
     

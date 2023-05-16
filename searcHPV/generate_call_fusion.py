@@ -2,6 +2,8 @@ import pysam
 import sys
 from searcHPV.general import *
 import re
+import string
+import re
 
 ##################
 #find the end of each cigar string slot
@@ -153,12 +155,13 @@ def define_fusion(bam,virus_chrm,out_dir):
                 if read.next_reference_name == virus_chrm:
                     paired_evidence_count += 1
         b[i] += (str(paired_evidence_count),)
-    
-    with open(f'{out_dir}/{virus_chrm}.genome_fusion.txt','w') as output:
+    invalidCharacter = re.escape(string.punctuation)
+    virus_chrm_file_name = re.sub(r'['+invalidCharacter+']',"_",virus_chrm)
+    with open(f'{out_dir}/{virus_chrm_file_name}.genome_fusion.txt','w') as output:
         output.write('chrm\tpos\tsingle_evidence\tpaired_evidence\n')
         for i in b:
             output.write(f'{i[0]}\t{i[1]}\t{i[2]}\t{i[3]}\n')
-    return f'{out_dir}/{virus_chrm}.genome_fusion.txt'
+    return f'{out_dir}/{virus_chrm_file_name}.genome_fusion.txt'
 
 ##################
 #cluster fusion points within certain base pair

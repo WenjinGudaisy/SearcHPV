@@ -13,7 +13,8 @@ from searcHPV.general import *
 #outputDir: output directory
 #multi: if fastq file is in gz format: default = True
 #index: if True, index the reference files; if False, not index the references files
-def alignment(fq1, fq2, humRef, virRef, outputDir, index, gz):
+#memory: memory size allocated
+def alignment(fq1, fq2, humRef, virRef, outputDir, index, gz, memory,thread):
     #make output dir
     outputDir = os.path.abspath(outputDir)
     mkdir(outputDir)
@@ -26,8 +27,8 @@ def alignment(fq1, fq2, humRef, virRef, outputDir, index, gz):
 
     alignmentFile = scriptDir + "/orignal.alignment.sh"
     indelFile = scriptDir + "/indel.alignment.sh"
-    generate_alignment_bash(alignmentFile,ref,fq1,fq2,scriptDir,gz)
-    generate_indel_alignment_bash(indelFile,ref,scriptDir)
+    generate_alignment_bash(alignmentFile,ref,fq1,fq2,scriptDir,memory,thread,gz)
+    generate_indel_alignment_bash(indelFile,ref,scriptDir, memory,thread)
     check_file(alignmentFile)
     check_file(indelFile)
     bashFile = scriptDir + f"/alignment.sh"
@@ -51,7 +52,7 @@ def alignment(fq1, fq2, humRef, virRef, outputDir, index, gz):
     if index:
     ##generate mkdup alignment bash file
         mkdupFile = scriptDir + "/mkdup.alignment.sh"
-        generate_mkdup_bash(mkdupFile,scriptDir)
+        generate_mkdup_bash(mkdupFile,scriptDir,thread)
 
         with open(bashFile,'w') as output:
             output.write(f'''#!/bin/bash
@@ -65,7 +66,7 @@ bash {rmInter};''')
     else:
         ##generate mkdup alignment bash file
         mkdupFile = scriptDir + "/mkdup.alignment.sh"
-        generate_mkdup_bash(mkdupFile,scriptDir)
+        generate_mkdup_bash(mkdupFile,scriptDir,thread)
 
         with open(bashFile,'w') as output:
             output.write(f'''#!/bin/bash

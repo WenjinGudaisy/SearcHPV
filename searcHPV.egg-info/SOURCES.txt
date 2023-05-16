@@ -1,3 +1,4 @@
+LICENSE
 README.md
 setup.py
 ./searcHPV/__init__.py
@@ -9,7 +10,6 @@ setup.py
 ./searcHPV/generate_call_fusion.py
 ./searcHPV/generate_call_fusion_virus.py
 ./searcHPV/genome_fusion.py
-./searcHPV/hpv_fusion.py
 ./searcHPV/main.py
 ./searcHPV/selection_contig_call_virus_insertion.py
 searcHPV/__init__.py
@@ -21,9 +21,9 @@ searcHPV/generate_assemble.py
 searcHPV/generate_call_fusion.py
 searcHPV/generate_call_fusion_virus.py
 searcHPV/genome_fusion.py
-searcHPV/hpv_fusion.py
 searcHPV/main.py
 searcHPV/selection_contig_call_virus_insertion.py
+searcHPV/virus_fusion.py
 searcHPV.egg-info/PKG-INFO
 searcHPV.egg-info/SOURCES.txt
 searcHPV.egg-info/dependency_links.txt

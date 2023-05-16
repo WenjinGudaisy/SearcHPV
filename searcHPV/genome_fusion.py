@@ -2,6 +2,7 @@ import os
 import sys
 from searcHPV.general import *
 from searcHPV.generate_call_fusion import *
+import string
 
 def genomeFusion(window,out_dir,virRef):
 
@@ -24,7 +25,10 @@ def genomeFusion(window,out_dir,virRef):
 
         #filter and cluster fusion points
         ##sort result
-        os.system(f'(head -n 1 {res} && tail -n +2 {res} | sort -k3,3rn) > {out_dir}/{virus_chrm}.genome_fusion.sort.txt')
+        #if there are invalid characters in the chromosome name:
+        invalidCharacter = re.escape(string.punctuation)
+        virus_chrm_file_name = re.sub(r'['+invalidCharacter+']',"_",virus_chrm)
+        os.system(f'(head -n 1 {res} && tail -n +2 {res} | sort -k3,3rn) > {out_dir}/{virus_chrm_file_name}.genome_fusion.sort.txt')
 
 
         #change format for cluster
@@ -32,9 +36,9 @@ def genomeFusion(window,out_dir,virRef):
         chrm_li = list(map(str,chrm_li))
         chrm_li+=['X','Y']
 
-        with open(f'{out_dir}/{virus_chrm}.all.result','w') as output:   
+        with open(f'{out_dir}/{virus_chrm_file_name}.all.result','w') as output:   
                 fusion_li = []
-                with open(f'{out_dir}/{virus_chrm}.genome_fusion.sort.txt') as res:
+                with open(f'{out_dir}/{virus_chrm_file_name}.genome_fusion.sort.txt') as res:
                     res.readline()
                     for line in res.read().rstrip().split('\n'):
                         elements = line.rstrip().split('\t')
@@ -51,12 +55,12 @@ def genomeFusion(window,out_dir,virRef):
                 output.write(f'{to_print}')
 
         ##cluster the events within 100bp from each other, maybe becasue of SVs or CNVs
-        cluster_result(f'{out_dir}/{virus_chrm}.all.result',f'{out_dir}/{virus_chrm}.all.clustered.result',window)
+        cluster_result(f'{out_dir}/{virus_chrm_file_name}.all.result',f'{out_dir}/{virus_chrm_file_name}.all.clustered.result',window)
 
 
         ##filter for sites with at least 2 split read  and 2 pairs of read support(high cutoff) and their summation greater than 5
-        with open(f'{out_dir}/{virus_chrm}.all.clustered.result') as inf:
-            with open(f'{out_dir}/{virus_chrm}.all.filtered.clustered.result','w') as outf:
+        with open(f'{out_dir}/{virus_chrm_file_name}.all.clustered.result') as inf:
+            with open(f'{out_dir}/{virus_chrm_file_name}.all.filtered.clustered.result','w') as outf:
                 for line in inf.read().rstrip().split('\n'):
                     elements = line.rstrip()
                     if elements == "":

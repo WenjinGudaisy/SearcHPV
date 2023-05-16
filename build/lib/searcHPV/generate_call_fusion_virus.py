@@ -8,7 +8,7 @@ from searcHPV.general import *
 #out_dir:out_dir for searcHPV
 #humRef: human reference genome
 #return: path of bash script 
-def mapToRef(out_dir):
+def mapToRef(out_dir,thread):
     newRef = f'{out_dir}/hg_hpv.fa'
     sitesPath = f'{out_dir}/assemble/'
     listSites = os.listdir(sitesPath)
@@ -23,11 +23,11 @@ def mapToRef(out_dir):
                     contigPath = f'{sitesPath}/{site}/pearOutput/'            
                     sitePath = f'{out_dir}/call_fusion_virus/{site}/'
                     mkdir(sitePath)
-                    bashFile.write( f'''bwa mem -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
+                    bashFile.write( f'''bwa mem -t {thread} -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
 {newRef} {contigPath}/{site}.all.fa.cap.contigs > {sitePath}/{site}.contig.sam;
-samtools view -bhS {sitePath}/{site}.contig.sam > {sitePath}/{site}.contig.bam;
-samtools sort {sitePath}/{site}.contig.bam -o {sitePath}/{site}.contig.sort.bam;
-samtools index {sitePath}/{site}.contig.sort.bam;
+samtools view -@ {thread} -bhS {sitePath}/{site}.contig.sam > {sitePath}/{site}.contig.bam;
+samtools sort -@ {thread} {sitePath}/{site}.contig.bam -o {sitePath}/{site}.contig.sort.bam;
+samtools index -@ {thread} {sitePath}/{site}.contig.sort.bam;
 rm {sitePath}/{site}.contig.bam;\n''')
     return f'{outputPath}/alignContigsToRef.sh'
 
@@ -39,7 +39,7 @@ rm {sitePath}/{site}.contig.bam;\n''')
 #out_dir:out_dir for searcHPV
 #humRef: human reference genome
 #return: path of bash script 
-def mapToHgRef(out_dir,humRef):
+def mapToHgRef(out_dir,humRef,thread):
     sitesPath = f'{out_dir}/assemble/'
     listSites = os.listdir(sitesPath)
     outputPath = f'{out_dir}/call_fusion_virus/'
@@ -53,11 +53,11 @@ def mapToHgRef(out_dir,humRef):
                     contigPath = f'{sitesPath}/{site}/pearOutput/'            
                     sitePath = f'{out_dir}/call_fusion_virus/{site}/'
                     mkdir(sitePath)
-                    bashFile.write( f'''bwa mem -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
+                    bashFile.write( f'''bwa mem -t {thread} -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
 {humRef} {contigPath}/{site}.all.fa.cap.contigs > {sitePath}/{site}.contigToGenome.sam;
-samtools view -bhS {sitePath}/{site}.contigToGenome.sam > {sitePath}/{site}.contigToGenome.bam;
-samtools sort {sitePath}/{site}.contigToGenome.bam -o {sitePath}/{site}.contigToGenome.sort.bam;
-samtools index {sitePath}/{site}.contigToGenome.sort.bam;
+samtools view -@ {thread} -bhS {sitePath}/{site}.contigToGenome.sam > {sitePath}/{site}.contigToGenome.bam;
+samtools sort -@ {thread} {sitePath}/{site}.contigToGenome.bam -o {sitePath}/{site}.contigToGenome.sort.bam;
+samtools index -@ {thread} {sitePath}/{site}.contigToGenome.sort.bam;
 rm {sitePath}/{site}.contigToGenome.bam;\n''')
     return f'{outputPath}/alignContigsToGenome.sh'
 
@@ -66,7 +66,7 @@ rm {sitePath}/{site}.contigToGenome.bam;\n''')
 #out_dir:out_dir for searcHPV
 #virRef: virus reference genome
 #return: path of bash script 
-def mapToVirRef(out_dir,virRef):
+def mapToVirRef(out_dir,virRef,thread):
     sitesPath = f'{out_dir}/assemble/'
     listSites = os.listdir(sitesPath)
     outputPath = f'{out_dir}/call_fusion_virus/'
@@ -79,12 +79,12 @@ def mapToVirRef(out_dir,virRef):
                 if ".sh" not in site:
                     contigPath = f'{sitesPath}/{site}/pearOutput/'
                     sitePath = f'{out_dir}/call_fusion_virus/{site}/'
-                    bashFile.write( f'''bwa mem -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
+                    bashFile.write( f'''bwa mem -t {thread} -R \'@RG\\tID:hpv\\tSM:hpv\\tLB:hpv\\tPL:ILLUMINA\' -M -t 8 \
 {virRef} {contigPath}/{site}.all.fa.cap.contigs > {contigPath}/{site}.contigToVirus.sam;
-samtools view -bhS {contigPath}/{site}.contigToVirus.sam >  {contigPath}/{site}.contigToVirus.bam;
-samtools sort {contigPath}/{site}.contigToVirus.bam -o {sitePath}/{site}.contigToVirus.sort.bam;
-samtools index {sitePath}/{site}.contigToVirus.sort.bam;
-samtools faidx {contigPath}/{site}.all.fa.cap.contigs;
+samtools view -@ {thread} -bhS {contigPath}/{site}.contigToVirus.sam >  {contigPath}/{site}.contigToVirus.bam;
+samtools sort -@ {thread} {contigPath}/{site}.contigToVirus.bam -o {sitePath}/{site}.contigToVirus.sort.bam;
+samtools index -@ {thread} {sitePath}/{site}.contigToVirus.sort.bam;
+samtools faidx -@ {thread} {contigPath}/{site}.all.fa.cap.contigs;
 rm {contigPath}/{site}.contigToVirus.bam;\n''')
     return f'{outputPath}/alignContigsToVirus.sh'
 

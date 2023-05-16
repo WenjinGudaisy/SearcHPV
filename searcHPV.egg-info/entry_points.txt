@@ -1,3 +1,2 @@
 [console_scripts]
 searcHPV = searcHPV.main:main
-

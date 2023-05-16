@@ -14,7 +14,7 @@ dependencies:
   - cap3=10.2011
   - pysam=0.15.3
   - pandas=1.2.4
-  - pip
+  - pip=22.3.1
   - pip:
     - argparse
     - searcHPV

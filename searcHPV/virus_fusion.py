@@ -9,10 +9,10 @@ from searcHPV.selection_contig_call_virus_insertion import *
 #virRef: virus reference genome
 #out_dir: output directory for seacHPV
 #n: poly(n), n*d(A/T/C/G), will report low confidence if contig contains poly(n)
-def virus_fusion(humRef,virRef,out_dir,n):
-    script_map = mapToRef(out_dir)
-    script_mapHg = mapToHgRef(out_dir,humRef)
-    script_mapVir = mapToVirRef(out_dir,virRef)
+def virus_fusion(humRef,virRef,out_dir,n,thread):
+    script_map = mapToRef(out_dir,thread)
+    script_mapHg = mapToHgRef(out_dir,humRef,thread)
+    script_mapVir = mapToVirRef(out_dir,virRef,thread)
     os.system(f'chmod +x {script_map}')
     subprocess.call(script_map)
     os.system(f'chmod +x {script_mapHg}')

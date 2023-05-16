@@ -42,21 +42,21 @@ picard CreateSequenceDictionary R={ref} O={ref.replace('.fa','.dict')}
 #fq2: fastq2 file
 #out_dir: outputPath
 #gz: if fastq file is in gz format: default = True
-def generate_alignment_bash(bash_file,ref,fq1,fq2,out_dir,gz = True):
+def generate_alignment_bash(bash_file,ref,fq1,fq2,out_dir,memory,thread,gz = True):
     with open(bash_file,'w') as output:
         if gz:
             output.write(f'''
-    bwa mem {ref} '<zcat {fq1}' '<zcat {fq2}' > {out_dir}/alignment.sam
-    samtools view -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
-    samtools sort {out_dir}/alignment.bam -o {out_dir}/alignment.sort.bam
+    bwa mem -t {thread} {ref} '<zcat {fq1}' '<zcat {fq2}' > {out_dir}/alignment.sam
+    samtools view -@ {thread} -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
+    samtools sort -@ {thread} {out_dir}/alignment.bam -o {out_dir}/alignment.sort.bam
     rm {out_dir}/alignment.sam
     echo \'alignment done\'
     ''')
         else:
             output.write(f'''
-    bwa mem {ref} '<cat {fq1}' '<cat {fq2}' > {out_dir}/alignment.sam
-    samtools view -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
-    samtools sort {out_dir}/alignment.bam -o {out_dir}/alignment.sort.bam
+    bwa mem -t {thread} {ref} '<cat {fq1}' '<cat {fq2}' > {out_dir}/alignment.sam
+    samtools view -@ {thread} -bhS {out_dir}/alignment.sam > {out_dir}/alignment.bam
+    samtools sort -@ {thread} {out_dir}/alignment.bam -o {out_dir}/alignment.sort.bam
     rm {out_dir}/alignment.sam
     echo \'alignment done\'
     ''')
@@ -78,7 +78,7 @@ def generate_alignment_bash(bash_file,ref,fq1,fq2,out_dir,gz = True):
 #picard: full path of picard
 #gatk: full path of GATK
 #java: full path of java
-def generate_indel_alignment_bash(bash_File,ref,out_dir):
+def generate_indel_alignment_bash(bash_File,ref,out_dir,memory,thread):
     with open(bash_File,'w') as output:
         output.write(f'''picard \
 AddOrReplaceReadGroups \
@@ -89,35 +89,37 @@ RGPL=illumina \
 RGPU=NA \
 RGSM=sample \
 RGLB=sample
-samtools sort {out_dir}/alignment.RG.bam -o {out_dir}/alignment.RG.sort.bam
-samtools index {out_dir}/alignment.RG.sort.bam
+samtools sort -@ {thread} {out_dir}/alignment.RG.bam -o {out_dir}/alignment.RG.sort.bam
+samtools index -@ {thread} {out_dir}/alignment.RG.sort.bam
 GenomeAnalysisTK \
+-Xmx{memory} \
 -T RealignerTargetCreator \
 -R {ref} \
 -I {out_dir}/alignment.RG.sort.bam \
 -o {out_dir}/alignment.RG.intervals
 GenomeAnalysisTK \
+-Xmx{memory} \
 -T IndelRealigner \
 -R {ref} \
 -I {out_dir}/alignment.RG.sort.bam \
 -targetIntervals {out_dir}/alignment.RG.intervals \
 -o {out_dir}/alignment.RG.indelre.bam
-samtools index {out_dir}/alignment.RG.indelre.bam
+samtools index -@ {thread} {out_dir}/alignment.RG.indelre.bam
 echo \'indel alignment done\'''')
 
 
 
-def generate_mkdup_bash(bash_File,out_dir):
+def generate_mkdup_bash(bash_File,out_dir,thread):
     with open(bash_File,'w') as output:
         output.write(f'''
-samtools sort -n {out_dir}/alignment.RG.indelre.bam -o {out_dir}/alignment.RG.indelre.sortbyQ.bam
+samtools sort -@ {thread} -n {out_dir}/alignment.RG.indelre.bam -o {out_dir}/alignment.RG.indelre.sortbyQ.bam
 picard MarkDuplicates \
 I={out_dir}/alignment.RG.indelre.sortbyQ.bam \
 O={out_dir}/alignment.RG.indelre.mkdup.bam \
 M={out_dir}/alignment.RG.indelre.mkdup.txt \
 TAGGING_POLICY=All ASSUME_SORT_ORDER=queryname
-samtools sort {out_dir}/alignment.RG.indelre.mkdup.bam -o {out_dir}/alignment.RG.indelre.mkdup.sort.bam
-samtools index {out_dir}/alignment.RG.indelre.mkdup.sort.bam
+samtools sort -@ {thread} {out_dir}/alignment.RG.indelre.mkdup.bam -o {out_dir}/alignment.RG.indelre.mkdup.sort.bam
+samtools index -@ {thread} {out_dir}/alignment.RG.indelre.mkdup.sort.bam
 echo \'indel alignment done\'''')
 
 

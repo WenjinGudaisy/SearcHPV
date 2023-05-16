@@ -9,7 +9,7 @@ import os
 #out_dir: output directory for searcHPV
 #virRef: virus reference genome
 #window: the length of region searching for informative reads, default=300
-def assemble(fq1, fq2, out_dir,virRef,gz,window):
+def assemble(fq1, fq2, out_dir,virRef,gz,window,memory,thread):
     bam = f'{out_dir}/alignment/alignment.RG.indelre.mkdup.sort.bam'
     check_file(bam)
     assemble_out_dir = f'{out_dir}/assemble/'
@@ -20,7 +20,7 @@ def assemble(fq1, fq2, out_dir,virRef,gz,window):
     subprocess.call(script_read_seq)
     
     #preprocessForPear(assemble_out_dir)
-    script_pear = pear(assemble_out_dir)
+    script_pear = pear(assemble_out_dir,memory,thread)
     os.system(f'chmod +x {script_pear}')
     subprocess.call(script_pear)
 

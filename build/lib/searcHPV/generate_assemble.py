@@ -3,6 +3,7 @@ import os
 import re
 import pysam
 from searcHPV.general import *
+import string
 
 ########################
 #get informative reads (SP + PE) from bam file
@@ -67,7 +68,9 @@ def extract_read_name(bam,out_dir,virRef,window):
             if '>' in each:
                 virus_chrm_list.append(each.split()[0].replace('>',''))
     for virus_chrm in virus_chrm_list:
-        fusionRes = f'{out_dir}/call_fusion/{virus_chrm}.all.filtered.clustered.result'
+        invalidCharacter = re.escape(string.punctuation)
+        virus_chrm_file_name = re.sub(r'['+invalidCharacter+']',"_",virus_chrm)
+        fusionRes = f'{out_dir}/call_fusion/{virus_chrm_file_name}.all.filtered.clustered.result'
         check_file(fusionRes)
         with open(fusionRes) as candidate_in:
             candidate_in = candidate_in.read().rstrip()
@@ -172,7 +175,7 @@ def preprocessForPear(out_dir):
 #Function:generate bash script for PEAR
 #out_dir:output directory for assemble
 #return:path of bash script
-def pear(out_dir):
+def pear(out_dir,memory,thread):
     listSites = os.listdir(out_dir)
     with open(f'{out_dir}/pear.sh','w') as output:
         output.write('#!/bin/bash\n')
@@ -184,6 +187,8 @@ def pear(out_dir):
                     os.mkdir(outputPath)
                 output.write(f'''
     pear \
+    -j {thread} \
+    -y {memory} \
     -f {fqPath}/{site}.informativeReads.1.fq \
     -r {fqPath}/{site}.informativeReads.2.fq \
     -o {outputPath}/{site}''')
